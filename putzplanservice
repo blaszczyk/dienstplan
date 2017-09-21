@@ -1,0 +1,3 @@
+cd target/appassembler/bin
+./service
+cd ../../..
