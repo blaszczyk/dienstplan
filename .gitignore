@@ -19,11 +19,24 @@ files/
 # Rose generated files
 #
 
-dienstplan-common/src/muettinghoven/dienstplan/model/*
-dienstplan-common/src/muettinghoven/dienstplan/dto/*
+dienstplan-common/src/muettinghoven/dienstplan/model/
+dienstplan-common/src/muettinghoven/dienstplan/dto/
 dienstplan-common/src/muettinghoven/dienstplan/resources/dienstplan*.rose
 dienstplan-common/src/META-INF/persistence.xml
 sql/createtables.sql
+dienstplan-app/app/src/main/java/muettinghoven/dienstplan/app/dto/
+dienstplan-app/app/src/main/java/muettinghoven/dienstplan/app/service/DienstplanService.java
+
+
+#
+# Android Files
+#
+dienstplan-app/.idea/
+dienstplan-app/build/
+dienstplan-app/.gradle
+dienstplan-app/app/build
+*.iml
+!dienstplan-app/gradle/wrapper/gradle-wrapper.jar
 
 #
 # Eclipse Files
