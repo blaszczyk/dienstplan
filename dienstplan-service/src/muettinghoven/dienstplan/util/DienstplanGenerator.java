@@ -1,4 +1,4 @@
-package muettinghoven.putzplan.util;
+package muettinghoven.dienstplan.util;
 
 import java.util.Calendar;
 import java.util.Comparator;
@@ -6,24 +6,28 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import bn.blaszczyk.rose.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
-import muettinghoven.putzplan.model.Putzplan;
-import muettinghoven.putzplan.model.Zeiteinheit;
-import muettinghoven.putzplan.model.Zeitraum;
+import muettinghoven.dienstplan.model.*;
 
-public class PutzplanGenerator
+public class DienstplanGenerator
 {
 	private static final Comparator<Zeitraum> BY_ANFANGSDATUM = (z1,z2) -> z1.getAnfangsdatum().compareTo(z2.getAnfangsdatum());
 	
 	private static final Calendar CALENDAR = GregorianCalendar.getInstance(Locale.GERMANY);
 	
-	public static void generiereBis(final Date endDatum, final Putzplan putzplan, final ModelController controller) throws RoseException
+	public static void generiereBis(final Date endDatum, final Dienstplan plan, final ModelController controller) throws RoseException
 	{
-		for(final Zeiteinheit einheit : Zeiteinheit.values())
+		final Set<Zeiteinheit> zeiteinheiten = plan.getDiensts()
+				.stream()
+				.map(Dienst::getZeiteinheit)
+				.collect(Collectors.toSet());
+		for(final Zeiteinheit einheit : zeiteinheiten)
 		{
-			final Optional<Zeitraum> optZeitraum = putzplan.getZeitraums()
+			final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
 					.stream()
 					.filter(z -> z.getZeiteinheit().equals(einheit))
 					.max(BY_ANFANGSDATUM);
@@ -33,21 +37,21 @@ public class PutzplanGenerator
 				while(datum.before(endDatum))
 				{
 					datum = nextDatum(datum, einheit);
-					addZeitraum(datum, putzplan, controller, einheit);
+					addZeitraum(datum, plan, controller, einheit);
 				}
 			}
 			else
-				addZeitraum(endDatum, putzplan, controller, einheit);
+				addZeitraum(endDatum, plan, controller, einheit);
 		}
 	}
 
-	private static void addZeitraum(final Date datum, final Putzplan putzplan, final ModelController controller,	final Zeiteinheit einheit) throws RoseException
+	private static void addZeitraum(final Date datum, final Dienstplan plan, final ModelController controller,	final Zeiteinheit einheit) throws RoseException
 	{
 		final Zeitraum jetzt = controller.createNew(Zeitraum.class);
 		jetzt.setAnfangsdatum(datum);
 		jetzt.setZeiteinheit(einheit);
-		jetzt.setEntity(Zeitraum.PUTZPLAN, putzplan);
-		controller.update(jetzt, putzplan);
+		jetzt.setEntity(Zeitraum.DIENSTPLAN, plan);
+		controller.update(jetzt, plan);
 	}
 	
 	private static Date nextDatum(final Date datum, final Zeiteinheit einheit)
@@ -55,6 +59,9 @@ public class PutzplanGenerator
 		CALENDAR.setTime(datum);
 		switch(einheit)
 		{
+		case TAG:
+			CALENDAR.add(Calendar.DAY_OF_YEAR, 1);
+			break;
 		case WOCHE:
 			CALENDAR.add(Calendar.DAY_OF_YEAR, 7);
 			break;
@@ -65,10 +72,10 @@ public class PutzplanGenerator
 		return CALENDAR.getTime();
 	}
 
-	public static int jetztId(final Putzplan putzplan, final Zeiteinheit einheit) throws RoseException
+	public static int jetztId(final Dienstplan plan, final Zeiteinheit einheit) throws RoseException
 	{
 		final Date now = new Date();
-		final Optional<Zeitraum> optZeitraum = putzplan.getZeitraums()
+		final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
 				.stream()
 				.filter(z -> z.getZeiteinheit().equals(einheit))
 				.filter(z -> z.getAnfangsdatum().before(now))

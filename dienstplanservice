@@ -1,0 +1,3 @@
+cd dienstplan-service/target/appassembler/bin
+./service
+cd ../../..

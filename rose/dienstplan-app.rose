@@ -1,0 +1,28 @@
+set srcpath app/src/main/java/
+set resourcepath app/src/main/res/
+
+set usingforeignkeys false
+set usingtimestamp true
+set dbtype mysql
+set dbuser root
+-set dbpassword 
+set dbserver localhost
+set dbport 3306
+set dbname dienstplan
+
+set resourcepackage muettinghoven.dienstplan.app.resources
+
+set dtopackage muettinghoven.dienstplan.app.dto
+set modelpackage muettinghoven.dienstplan.app.dto
+set usinginterfaces true
+set usingannotations true
+set implementdto false
+
+set retrofitname DienstplanService
+set retrofitpackage muettinghoven.dienstplan.app.service
+
+import dienstplan-model.rose
+
+create javadtos
+create javaenums
+create retrofit

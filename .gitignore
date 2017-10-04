@@ -19,9 +19,10 @@ files/
 # Rose generated files
 #
 
-putzplan-common/src/muettinghoven/putzplan/model/*
-putzplan-common/src/muettinghoven/putzplan/resources/putzplan.rose
-putzplan-common/src/META-INF/persistence.xml
+dienstplan-common/src/muettinghoven/dienstplan/model/*
+dienstplan-common/src/muettinghoven/dienstplan/dto/*
+dienstplan-common/src/muettinghoven/dienstplan/resources/dienstplan*.rose
+dienstplan-common/src/META-INF/persistence.xml
 sql/createtables.sql
 
 #

@@ -1,0 +1,42 @@
+begin entity Bewohner : P
+	varchar(50) name
+	date einzug
+	date auszug
+	manytomany Dienstplan
+	tostring %name
+end entity
+
+begin entity Dienstplan : P
+	varchar(50) name
+	onetomany Zeitraum
+	onetomany Dienst
+	tostring %name
+end entity
+
+begin enum Zeiteinheit
+	TAG
+	WOCHE
+	MONAT
+end enum
+
+begin entity Zeitraum : P
+	date anfangsdatum
+	enum Zeiteinheit
+	tostring %Zeiteinheit, start: %anfangsdatum
+end entity
+
+begin entity Dienst : P
+	varchar(30) name
+	varchar(200) beschreibung
+	enum Zeiteinheit
+	int intervall
+	tostring %name
+end entity
+
+begin entity DienstAusfuehrung : P
+	manytoone Dienst
+	manytoone Bewohner
+	manytoone Zeitraum
+	varchar(200) kommentar
+	tostring %Dienst von %Bewohner in %Zeitraum
+end entity

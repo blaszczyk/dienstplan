@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
   <Appenders>
-    <File name="FILE" fileName="log/putzplan.log" append="false">
+    <File name="FILE" fileName="log/dienstplan-service.log" append="false">
       <PatternLayout pattern="%t %-5p %c{2} - %m%n"/>
     </File>
     <Console name="STDOUT" target="SYSTEM_OUT">

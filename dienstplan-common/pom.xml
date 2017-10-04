@@ -3,15 +3,25 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>muettinghoven</groupId>
-    <artifactId>putzplan</artifactId>
-    <version>${putzplan.version}</version>
+    <artifactId>dienstplan</artifactId>
+    <version>0.0.1</version>
   </parent>
-  <artifactId>putzplan-common</artifactId>
+  <artifactId>dienstplan-common</artifactId>
   <dependencies>
     <dependency>
       <groupId>bn.blaszczyk</groupId>
       <artifactId>rose-common</artifactId>
-      <version>0.34</version>
+      <version>0.43</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>retrofit</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>converter-gson</artifactId>
+      <version>2.3.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -28,9 +38,9 @@
       <plugin>
         <groupId>bn.blaszczyk</groupId>
         <artifactId>rose</artifactId>
-        <version>0.115</version>
+        <version>0.130</version>
         <configuration>
-          <rosefile>../rose/putzplan.rose</rosefile>
+          <rosefile>../rose/dienstplan-common.rose</rosefile>
         </configuration>
       </plugin>
       <plugin>

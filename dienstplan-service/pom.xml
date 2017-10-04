@@ -3,20 +3,20 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>muettinghoven</groupId>
-    <artifactId>putzplan</artifactId>
-    <version>${putzplan.version}</version>
+    <artifactId>dienstplan</artifactId>
+    <version>${dienstplan.version}</version>
   </parent>
-  <artifactId>putzplan-service</artifactId>
+  <artifactId>dienstplan-service</artifactId>
   <dependencies>
     <dependency>
       <groupId>muettinghoven</groupId>
-      <artifactId>putzplan-common</artifactId>
-      <version>${putzplan.version}</version>
+      <artifactId>dienstplan-common</artifactId>
+      <version>${dienstplan.version}</version>
     </dependency>
     <dependency>
       <groupId>bn.blaszczyk</groupId>
       <artifactId>rose-service</artifactId>
-      <version>0.37</version>
+      <version>0.43</version>
     </dependency>
   </dependencies>
   <build>
@@ -45,7 +45,7 @@
         <configuration>
           <programs>
             <program>
-              <mainClass>muettinghoven.putzplan.service.PutzPlanServiceLauncher</mainClass>
+              <mainClass>muettinghoven.dienstplan.service.DienstplanServiceLauncher</mainClass>
               <id>service</id>
             </program>
           </programs>
