@@ -80,7 +80,7 @@ public class DienstAusfuehrung implements Serializable {
     }
 
 
-    private static String zeitraum(final ZeitraumDto zeitraum)
+    public static String zeitraum(final ZeitraumDto zeitraum)
     {
         final Date datum = new Date(zeitraum.getAnfangsdatum());
         CALENDAR.setTime(datum);

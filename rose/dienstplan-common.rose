@@ -27,5 +27,4 @@ create sqlcreate
 create persistence
 create javamodels
 create javadtos
-create retrofit
 create rosefilecopy

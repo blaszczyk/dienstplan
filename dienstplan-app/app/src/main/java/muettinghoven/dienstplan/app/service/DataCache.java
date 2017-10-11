@@ -1,11 +1,22 @@
 package muettinghoven.dienstplan.app.service;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -22,9 +33,21 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class DienstplanProvider
+public class DataCache
 {
+    private static final Gson GSON = new Gson();
+
+    private static final Type BEWOHNER_LIST = new TypeToken<ArrayList<BewohnerDto>>(){}.getType();
+    private static final Type DIENST_LIST = new TypeToken<ArrayList<DienstDto>>(){}.getType();
+    private static final Type PLAN_LIST = new TypeToken<ArrayList<DienstplanDto>>(){}.getType();
+    private static final Type ZEITRAUM_LIST = new TypeToken<ArrayList<ZeitraumDto>>(){}.getType();
+    private static final Type AUSFUEHRUNG_LIST = new TypeToken<ArrayList<DienstAusfuehrungDto>>(){}.getType();
+
     private final DienstplanService service;
+
+    private final File baseDir;
+
+    private final OtherService otherService;
 
     private final Map<Integer,BewohnerDto> bewohner = new HashMap<>();
     private final Map<Integer,DienstplanDto> dienstplaene = new HashMap<>();
@@ -32,19 +55,96 @@ public class DienstplanProvider
     private final Map<Integer,ZeitraumDto> zeitraeume = new HashMap<>();
     private final Map<Integer, DienstAusfuehrungDto> dienstausfuehrungen = new HashMap<>();
 
-    public DienstplanProvider()
+    public DataCache(final String baseUrl, final File baseDir)
     {
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .readTimeout(600, TimeUnit.SECONDS)
-                .connectTimeout(600, TimeUnit.SECONDS)
+                .readTimeout(3, TimeUnit.SECONDS)
+                .connectTimeout(3, TimeUnit.SECONDS)
                 .build();
 
         final Retrofit retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
-                .baseUrl("http://192.168.1.223:4053/entity/")
+                .baseUrl(baseUrl + "/")
                 .addConverterFactory(GsonConverterFactory.create(new Gson()))
                 .build();
         service = retrofit.create(DienstplanService.class);
+        otherService = retrofit.create(OtherService.class);
+        this.baseDir = baseDir;
+    }
+
+    public void loadDataForBewohner(final int bewohnerId) throws ServiceException {
+        try {
+            final BewohnerDto bewohner = service.getBewohnerById(bewohnerId).execute().body();
+            store(bewohner,this.bewohner);
+            final List<DienstplanDto> plaene = service.getDienstplansByIds(bewohner.getDienstplansIds()).execute().body();
+            store(plaene,this.dienstplaene);
+            for(final DienstplanDto plan : plaene)
+            {
+                final List<DienstDto> dienste = service.getDienstsByIds(plan.getDienstsIds()).execute().body();
+                store(dienste,this.dienste);
+                final List<BewohnerDto> mitBewohner = service.getBewohnersByIds(plan.getBewohnersIds()).execute().body();
+                store(mitBewohner,this.bewohner);
+                final List<ZeitraumDto> zeitraeume = service.getZeitraumsByIds(plan.getZeitraumsIds()).execute().body();
+                store(zeitraeume, this.zeitraeume);
+                for(final DienstDto dienst : dienste)
+                {
+                    final List<DienstAusfuehrungDto> ausfuehrungen = service.getDienstAusfuehrungsByIds(dienst.getDienstAusfuehrungsIds()).execute().body();
+                    store(ausfuehrungen, this.dienstausfuehrungen);
+                }
+            }
+            final List<DienstAusfuehrungDto> myDienstAusfuehrungen = service.getDienstAusfuehrungsByIds(bewohner.getDienstAusfuehrungsIds()).execute().body();
+            store(myDienstAusfuehrungen, this.dienstausfuehrungen);
+        }
+        catch (Exception e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    public boolean isConnected() {
+        try {
+            final int code = otherService.ping().execute().code();
+            return code < 300;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void saveToFiles() throws ServiceException {
+        saveToFile("dienste",dienste);
+        saveToFile("bewohner", bewohner);
+        saveToFile("plaene", dienstplaene);
+        saveToFile("zeitreaume", zeitraeume);
+        saveToFile("dienstausfuehrungen", dienstausfuehrungen);
+    }
+
+    private <T extends Identifyable> void saveToFile(final String fileName, final Map<Integer,T> map) throws ServiceException {
+        final File file = new File(baseDir, fileName + ".json");
+        try(final Writer writer = new FileWriter(file)) {
+            GSON.toJson(map.values(),writer);
+        }
+        catch (IOException e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    public void loadFromFiles() throws ServiceException {
+        loadFromFile("dienste",dienste,DIENST_LIST);
+        loadFromFile("bewohner", bewohner,BEWOHNER_LIST);
+        loadFromFile("plaene", dienstplaene,PLAN_LIST);
+        loadFromFile("zeitreaume", zeitraeume,ZEITRAUM_LIST);
+        loadFromFile("dienstausfuehrungen", dienstausfuehrungen,AUSFUEHRUNG_LIST);
+    }
+
+    private <T extends Identifyable> void loadFromFile(final String fileName, final Map<Integer,T> map, final Type type) throws ServiceException {
+        final File file = new File(baseDir, fileName + ".json");
+        try(final Reader reader = new FileReader(file)) {
+            final List<T> dtos = GSON.fromJson(reader, type);
+            store(dtos, map);
+        }
+        catch (IOException e) {
+            throw new ServiceException(e);
+        }
     }
 
     public List<BewohnerDto> getBewohner(final List<Integer> ids) throws ServiceException

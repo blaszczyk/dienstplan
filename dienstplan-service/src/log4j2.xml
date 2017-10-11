@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
   <Appenders>
-    <File name="FILE" fileName="log/dienstplan-service.log" append="false">
-      <PatternLayout pattern="%t %-5p %c{2} - %m%n"/>
+    <File name="FILE" fileName="log/dienstplan-service.log" append="true">
+      <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
     </File>
     <Console name="STDOUT" target="SYSTEM_OUT">
       <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>

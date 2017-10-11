@@ -51,9 +51,9 @@ public class DienstAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final View view = inflater.inflate(R.layout.sample_dienst_view,null);
+        final View view = inflater.inflate(R.layout.dienst_item_view,null);
         final TextView dienstNameTextView = (TextView) view.findViewById(R.id.dienstNameTextView);
-        final TextView bewohnerTextView = (TextView) view.findViewById(R.id.bewohnerTextView);
+        final TextView bewohnerTextView = (TextView) view.findViewById(R.id.bewohnerNameTextView);
         final TextView zeitraumTextView = (TextView) view.findViewById(R.id.zeitraumTextView);
 
         final DienstAusfuehrung dienst = dienste.get(position);

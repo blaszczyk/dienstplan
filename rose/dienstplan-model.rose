@@ -1,5 +1,6 @@
 begin entity Bewohner : P
 	varchar(50) name
+	char(6) farbe
 	date einzug
 	date auszug
 	manytomany Dienstplan
