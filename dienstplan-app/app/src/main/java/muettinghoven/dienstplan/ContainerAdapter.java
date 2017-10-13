@@ -15,48 +15,41 @@ import java.util.List;
 import java.util.Map;
 
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
+import muettinghoven.dienstplan.app.model.DienstContainer;
 
 
 public class ContainerAdapter extends BaseAdapter {
 
-    public enum Type {
-        DIENST,
-        ZEITRAUM;
-    }
 
-    private List<Map.Entry<Integer,String>> items;
-    private Type type;
+    private List<DienstContainer> containers;
 
     private final Context context;
 
-    public ContainerAdapter(final Context context, final Map<Integer,String> items, final Type type)
+    public ContainerAdapter(final Context context, final List<DienstContainer> containers)
     {
         this.context = context;
-        this.type = type;
-        this.items = new ArrayList<>();
-        for(final Map.Entry<Integer,String> e : items.entrySet())
-            this.items.add(e);
+        this.containers = containers;
     }
 
     @Override
     public int getCount() {
-        return items.size();
+        return containers.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return items.get(position).getValue();
+        return containers.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return items.get(position).getKey();
+        return containers.get(position).getId();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final TextView view = new TextView(context);
-        view.setText(items.get(position).getValue());
+        view.setText(containers.get(position).getName());
         view.setTextSize(26);
         view.setTextColor(Color.BLACK);
         view.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

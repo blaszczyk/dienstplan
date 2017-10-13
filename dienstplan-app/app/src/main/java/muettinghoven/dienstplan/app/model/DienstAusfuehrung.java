@@ -10,12 +10,9 @@ import muettinghoven.dienstplan.app.dto.BewohnerDto;
 import muettinghoven.dienstplan.app.dto.DienstAusfuehrungDto;
 import muettinghoven.dienstplan.app.dto.DienstDto;
 import muettinghoven.dienstplan.app.dto.ZeitraumDto;
+import muettinghoven.dienstplan.app.tools.DienstTools;
 
 public class DienstAusfuehrung implements Serializable {
-
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-
-    private static final Calendar CALENDAR = Calendar.getInstance();
 
     private final int id;
 
@@ -31,7 +28,7 @@ public class DienstAusfuehrung implements Serializable {
 
     public DienstAusfuehrung(final DienstAusfuehrungDto ausfuehrung, final BewohnerDto bewohner, final DienstDto dienst, final ZeitraumDto zeitraum)
     {
-        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(),zeitraum(zeitraum),ausfuehrung.getKommentar());
+        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar());
     }
 
     public DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar)
@@ -77,24 +74,5 @@ public class DienstAusfuehrung implements Serializable {
     public String toString()
     {
         return "id:" + id + ", bewohner:" + bewohner + ", dienst:" + dienst + ", dienstBeschreibung:" + dienstBeschreibung + ", zeitraum:" + zeitraum + ", kommentar:" + kommentar;
-    }
-
-
-    public static String zeitraum(final ZeitraumDto zeitraum)
-    {
-        final Date datum = new Date(zeitraum.getAnfangsdatum());
-        CALENDAR.setTime(datum);
-        switch (zeitraum.getZeiteinheit())
-        {
-            case TAG:
-                return DATE_FORMAT.format(datum);
-            case WOCHE:
-                CALENDAR.add(Calendar.DAY_OF_YEAR, 7);
-                return DATE_FORMAT.format(datum) + " - " + DATE_FORMAT.format(CALENDAR.getTime());
-            case MONAT:
-                CALENDAR.add(Calendar.MONTH, 1);
-                return DATE_FORMAT.format(datum) + " - " + DATE_FORMAT.format(CALENDAR.getTime());
-        }
-        return "invalid";
     }
 }

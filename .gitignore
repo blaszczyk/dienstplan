@@ -7,6 +7,8 @@
 *.ear
 lib/
 jar/
+dienstplan-service/log
+dienstplan-service/files
 files/
 
 #

@@ -31,6 +31,8 @@ import muettinghoven.dienstplan.app.dto.BewohnerDto;
 import muettinghoven.dienstplan.app.dto.DienstplanDto;
 import muettinghoven.dienstplan.app.dto.Zeiteinheit;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
+import muettinghoven.dienstplan.app.model.DienstContainer;
+import muettinghoven.dienstplan.app.model.Dienstplan;
 import muettinghoven.dienstplan.app.service.DataCache;
 import muettinghoven.dienstplan.app.service.DataProvider;
 import muettinghoven.dienstplan.app.service.ServiceException;
@@ -127,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(gotoWeb.resolveActivity(getPackageManager()) != null){
             startActivity(gotoWeb);
         }
-
     }
 
 
@@ -213,26 +214,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View dienstPlanView = inflater.inflate(R.layout.dienstplan_view,null);
         try {
-            final DienstplanDto plan = dataCache.getDienstplan(planId);
+            final Dienstplan plan = dataProvider.getPlan(planId);
             final TextView dienstplanNameTextView = (TextView) dienstPlanView.findViewById(R.id.dienstplanNameTextView);
             dienstplanNameTextView.setText(plan.getName());
 
             flipper = (ViewFlipper) dienstPlanView.findViewById(R.id.dienstCategoryViewFlipper);
 
 
-            flipper.addView(containerView("Dienste",dataProvider.getDienstNamen(planId), ContainerAdapter.Type.DIENST));
+            flipper.addView(containerView("Dienste",plan.getDienste()));
             for(final Zeiteinheit e : Zeiteinheit.values())
             {
-                final Map<Integer,String> names = dataProvider.getZeitraeume(planId,e);
-                if(!names.isEmpty())
-                    flipper.addView(containerView(e.name(),names, ContainerAdapter.Type.ZEITRAUM));
+                final List<DienstContainer> zeitraeume = plan.getZeitraeume(e);
+                if(!zeitraeume.isEmpty())
+                    flipper.addView(containerView(e.name(),zeitraeume));
             }
-            flipper.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    System.out.print(flipper.getChildCount());
-                }
-            });
         }
         catch (ServiceException e) {
             e.printStackTrace();
@@ -242,29 +237,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         container.addView(dienstPlanView);
     }
 
-    private View containerView(final String title, final Map<Integer,String> names, final ContainerAdapter.Type type) {
+    private View containerView(final String title, final List<DienstContainer> containers) {
         final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final LinearLayout containerView = (LinearLayout) inflater.inflate(R.layout.dienste_container,null);
         final TextView containerTypeTextView = (TextView) containerView.findViewById(R.id.containerTypeTextView);
         containerTypeTextView.setText(title);
         final ListView listView = new ListViewCompat(getApplicationContext());
-        final ContainerAdapter adapter = new ContainerAdapter(getApplicationContext(), names, type);
+        final ContainerAdapter adapter = new ContainerAdapter(getApplicationContext(), containers);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    final List<DienstAusfuehrung> dienste = dataProvider.getAusfuehrungenFor(type, (int)id);
-                    final String title = adapter.getItem(position).toString();
+                    final DienstContainer container = (DienstContainer) adapter.getItem(position);
+                    final List<DienstAusfuehrung> dienste = container.getAusfuehrungen();
+                    final String title = container.getName();
                     containerView.removeView(listView);
 
                     final ListView listView = new ListViewCompat(getApplicationContext());
                     final DienstAdapter adapter = new DienstAdapter(MainActivity.this, dienste);
                     listView.setAdapter(adapter);
                     containerView.addView(listView);
-                } catch (ServiceException e) {
-                    e.printStackTrace();
-                }
             }
         });
         containerView.addView(listView);
