@@ -1,13 +1,11 @@
 package muettinghoven.dienstplan.app.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import muettinghoven.dienstplan.ContainerAdapter;
 import muettinghoven.dienstplan.app.dto.*;
 import muettinghoven.dienstplan.app.model.*;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
@@ -24,7 +22,6 @@ public class DataProvider {
     public Dienstplan getPlan(final int id) throws ServiceException {
         final DienstplanDto planDto = provider.getDienstplan(id);
         final Dienstplan plan = new Dienstplan(id,planDto.getName());
-
 
         final Map<Integer,DienstContainer> zeitraeume = new TreeMap<>();
         for(final int zeitraumId : planDto.getZeitraumsIds())
@@ -52,23 +49,26 @@ public class DataProvider {
                 zeitraeume.get(ausfuehrungDto.getZeitraumId()).add(ausfuehrung);
             }
         }
+
         return plan;
     }
 
-    public List<DienstAusfuehrung> forBewohner(final int bewohnerID) throws ServiceException
+    public DienstContainer getBewohner(final int bewohnerID) throws ServiceException
     {
-        final BewohnerDto bewohner = provider.getBewohner(1);
-        final int[] ids = bewohner.getDienstAusfuehrungsIds();
+        final BewohnerDto bewohnerDto = provider.getBewohner(bewohnerID);
+        final DienstContainer bewohner = new DienstContainer(bewohnerID,bewohnerDto.getName(), DienstContainer.Typ.BEWOHNER);
+
+        final int[] ids = bewohnerDto.getDienstAusfuehrungsIds();
         final List<DienstAusfuehrungDto> dtos = provider.getDienstausfuehrung(toList(ids));
-        final List<DienstAusfuehrung> dienste = new ArrayList<>();
         for(final DienstAusfuehrungDto dto : dtos)
         {
             final DienstDto dienst = provider.getDienst(dto.getDienstId());
             final ZeitraumDto zeitraum = provider.getZetiraum(dto.getZeitraumId());
-            final DienstAusfuehrung dienstAusfuehrung = new DienstAusfuehrung(dto,bewohner,dienst,zeitraum);
-            dienste.add(dienstAusfuehrung);
+            final DienstAusfuehrung dienstAusfuehrung = new DienstAusfuehrung(dto,bewohnerDto,dienst,zeitraum);
+            bewohner.add(dienstAusfuehrung);
         }
-        return dienste;
+
+        return bewohner;
     }
 
     public Map<Integer,String> getDienstplaene(final int bewohnerId) throws ServiceException{

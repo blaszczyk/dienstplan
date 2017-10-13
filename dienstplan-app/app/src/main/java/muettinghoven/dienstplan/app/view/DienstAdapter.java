@@ -1,4 +1,4 @@
-package muettinghoven.dienstplan;
+package muettinghoven.dienstplan.app.view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.List;
 
+import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 
 

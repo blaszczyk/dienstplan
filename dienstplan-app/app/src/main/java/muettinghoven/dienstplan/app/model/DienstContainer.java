@@ -7,7 +7,8 @@ public class DienstContainer {
 
     public static enum Typ {
         DIENST,
-        ZEITRAUM;
+        ZEITRAUM,
+        BEWOHNER;
     }
 
     private final int id;

@@ -1,15 +1,16 @@
-package muettinghoven.dienstplan;
+package muettinghoven.dienstplan.app.view;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 
 public class DienstDetailActivity extends AppCompatActivity {
 
-    public static final String DIENST_AUSFUEHRUNG = "muettinghoven.dienstplan.DienstAusfuehrung";
+    public static final String DIENST_AUSFUEHRUNG = DienstAusfuehrung.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

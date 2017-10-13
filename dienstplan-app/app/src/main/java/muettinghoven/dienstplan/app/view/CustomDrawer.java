@@ -1,4 +1,4 @@
-package muettinghoven.dienstplan.app;
+package muettinghoven.dienstplan.app.view;
 
 import android.content.Context;
 import android.support.v4.widget.DrawerLayout;

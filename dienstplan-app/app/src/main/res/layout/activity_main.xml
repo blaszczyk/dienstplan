@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<muettinghoven.dienstplan.app.CustomDrawer xmlns:android="http://schemas.android.com/apk/res/android"
+<muettinghoven.dienstplan.app.view.CustomDrawer xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
@@ -22,4 +22,4 @@
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 
-</muettinghoven.dienstplan.app.CustomDrawer>
+</muettinghoven.dienstplan.app.view.CustomDrawer>

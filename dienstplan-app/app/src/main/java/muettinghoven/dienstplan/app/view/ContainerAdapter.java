@@ -1,4 +1,4 @@
-package muettinghoven.dienstplan;
+package muettinghoven.dienstplan.app.view;
 
 import android.content.Context;
 import android.content.Intent;
