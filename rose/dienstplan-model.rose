@@ -23,7 +23,7 @@ end enum
 begin entity Zeitraum : P
 	date anfangsdatum
 	enum Zeiteinheit
-	tostring %Zeiteinheit, start: %anfangsdatum
+	tostring %zeiteinheit, start: %anfangsdatum
 end entity
 
 begin entity Dienst : P
@@ -39,5 +39,5 @@ begin entity DienstAusfuehrung : P
 	manytoone Bewohner
 	manytoone Zeitraum
 	varchar(200) kommentar
-	tostring %Dienst von %Bewohner in %Zeitraum
+	tostring %dienst von %bewohner in %zeitraum
 end entity

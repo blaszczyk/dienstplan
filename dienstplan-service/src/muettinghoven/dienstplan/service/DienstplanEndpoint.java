@@ -25,19 +25,19 @@ public class DienstplanEndpoint implements Endpoint
 	{
 		try
 		{
-			final String[] split = path.split("\\/");
-			if(split.length != 2)
-				return HttpServletResponse.SC_BAD_REQUEST;
-			
-			final int planid = Integer.parseInt(split[0]);
-			final Dienstplan plan = controller.getEntityById(Dienstplan.class, planid);
-			final Zeiteinheit zeittyp = Zeiteinheit.valueOf(split[1]);
-			if(plan == null || zeittyp == null)
-				return HttpServletResponse.SC_NOT_FOUND;
-			
-			DienstplanGenerator.generiereBis(new Date(), plan, controller);
-			final int jetztId = DienstplanGenerator.jetztId(plan, zeittyp);
-			response.getWriter().write(jetztId);
+//			final String[] split = path.split("\\/");
+//			if(split.length != 2)
+//				return HttpServletResponse.SC_BAD_REQUEST;
+//			
+//			final int planid = Integer.parseInt(split[0]);
+//			final Dienstplan plan = controller.getEntityById(Dienstplan.class, planid);
+//			final Zeiteinheit zeittyp = Zeiteinheit.valueOf(split[1]);
+//			if(plan == null || zeittyp == null)
+//				return HttpServletResponse.SC_NOT_FOUND;
+//			
+//			DienstplanGenerator.generiereBis(new Date(), plan, controller);
+//			final int jetztId = DienstplanGenerator.jetztId(plan, zeittyp);
+//			response.getWriter().write(jetztId);
 			return HttpServletResponse.SC_OK;
 		}
 		catch (final Exception e) 
