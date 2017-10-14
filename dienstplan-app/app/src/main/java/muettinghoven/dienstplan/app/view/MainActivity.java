@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if(!controller.onBackPressed()) {
             super.onBackPressed();
         }
     }
@@ -101,13 +101,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             case  MotionEvent.ACTION_DOWN:
                 initialX = event.getX();
-                break;
+                return false;
             case MotionEvent.ACTION_UP:
                 final float direction = event.getX() - initialX;
-                controller.flipView(direction);
-                break;
+                return controller.flipView(direction);
         }
-        return true;
+        return false;
     }
 
     @Override

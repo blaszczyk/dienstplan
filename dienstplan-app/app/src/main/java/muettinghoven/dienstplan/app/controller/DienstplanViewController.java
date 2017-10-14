@@ -7,6 +7,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v7.widget.ListViewCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -125,10 +126,10 @@ public class DienstplanViewController {
         container.addView(dienstPlanView);
     }
 
-    public void flipView(final float direction)
+    public boolean flipView(final float direction)
     {
         if(flipper == null || Math.abs(direction) < SWIPE_SENSITIVITY)
-            return;
+            return false;
         if(direction < 0) {
             flipper.setInAnimation(mainActivity, R.anim.in_from_right);
             flipper.setOutAnimation(mainActivity,R.anim.out_to_left);
@@ -140,6 +141,7 @@ public class DienstplanViewController {
             flipper.showNext();
         }
         showContainerList();
+        return true;
     }
 
     private View containerView(final String title, final List<DienstContainer> containers) {
@@ -148,6 +150,12 @@ public class DienstplanViewController {
         containerView.setContainers(containers);
         final TextView containerTypeTextView = (TextView) containerView.findViewById(R.id.containerTypeTextView);
         containerTypeTextView.setText(title);
+        containerTypeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                showContainerList();
+            }
+        });
         showContainerList(containerView);
         return containerView;
     }
@@ -163,6 +171,12 @@ public class DienstplanViewController {
                 showSingleContainer(container);
             }
         });
+        listView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mainActivity.flipView(event);
+            }
+        });
         containerView.addView(listView);
 
         final int aktueller = DienstTools.aktueller(containerView.getContainers());
@@ -174,8 +188,6 @@ public class DienstplanViewController {
     }
 
     private void showSingleContainer(final DienstContainer container) {
-        final ContainerView containerView = getContainerView();
-        final List<DienstAusfuehrung> dienste = container.getAusfuehrungen();
         final String title = container.getName();
 
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -191,6 +203,7 @@ public class DienstplanViewController {
         });
 
         final ListView listView = (ListView) singleView.findViewById(R.id.dienstAusfuehrungListView);
+        final List<DienstAusfuehrung> dienste = container.getAusfuehrungen();
         final DienstAdapter adapter = new DienstAdapter(mainActivity, dienste);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -199,6 +212,14 @@ public class DienstplanViewController {
                 startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
             }
         });
+        listView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mainActivity.flipView(event);
+            }
+        });
+
+        final ContainerView containerView = getContainerView();
         containerView.addView(singleView);
 
         final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
@@ -244,6 +265,15 @@ public class DienstplanViewController {
         if(container.getChildCount() > 1)
             container.removeViewAt(1);
         container.addView(meineDiensteView);
+    }
+
+    public boolean onBackPressed() {
+        if(getContainerView().showsSingleContainer())
+        {
+            showContainerList();
+            return true;
+        }
+        return false;
     }
 
     private void startDienstAusfuehrungActivity(final DienstAusfuehrung ausfuehrung) {

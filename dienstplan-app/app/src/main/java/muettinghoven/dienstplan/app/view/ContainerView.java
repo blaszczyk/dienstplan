@@ -41,6 +41,11 @@ public class ContainerView extends LinearLayout {
         this.containers = containers;
     }
 
+    public boolean showsSingleContainer()  {
+        return currentView instanceof LinearLayout;
+    }
+
+
     @Override
     public void addView(View child) {
         if(currentView != null)
