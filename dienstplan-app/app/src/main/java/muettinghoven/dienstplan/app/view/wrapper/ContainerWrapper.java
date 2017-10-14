@@ -1,4 +1,4 @@
-package muettinghoven.dienstplan.app.view;
+package muettinghoven.dienstplan.app.view.wrapper;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -11,25 +11,23 @@ import java.util.List;
 
 import muettinghoven.dienstplan.app.model.DienstContainer;
 
-public class ContainerView extends LinearLayout {
+public class ContainerWrapper extends AbstractWrapper {
 
     private List<DienstContainer> containers;
 
-    private View currentView = null;
-
-    public ContainerView(Context context) {
+    public ContainerWrapper(Context context) {
         super(context);
     }
 
-    public ContainerView(Context context, @Nullable AttributeSet attrs) {
+    public ContainerWrapper(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ContainerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ContainerWrapper(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public ContainerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ContainerWrapper(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -42,15 +40,6 @@ public class ContainerView extends LinearLayout {
     }
 
     public boolean showsSingleContainer()  {
-        return currentView instanceof LinearLayout;
-    }
-
-
-    @Override
-    public void addView(View child) {
-        if(currentView != null)
-            removeView(currentView);
-        currentView = child;
-        super.addView(child);
+        return getView() instanceof LinearLayout;
     }
 }

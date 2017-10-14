@@ -303,6 +303,14 @@ public class DataCache
         }
     }
 
+    public void clear() {
+        bewohner.clear();
+        dienstplaene.clear();
+        dienste.clear();
+        zeitraeume.clear();
+        dienstausfuehrungen.clear();
+    }
+
     private static <E> boolean hasAllIds(final Iterable<Integer> ids, final Map<Integer,E> map)
     {
         for(final Integer id : ids)
@@ -352,5 +360,4 @@ public class DataCache
     {
         return map.get(id);
     }
-
 }

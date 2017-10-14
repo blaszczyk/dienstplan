@@ -10,6 +10,7 @@ jar/
 dienstplan-service/log
 dienstplan-service/files
 files/
+*temp/
 
 #
 # Log Files

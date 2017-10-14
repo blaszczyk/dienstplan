@@ -27,11 +27,12 @@ import muettinghoven.dienstplan.app.service.DataProvider;
 import muettinghoven.dienstplan.app.service.ServiceException;
 import muettinghoven.dienstplan.app.tools.DienstTools;
 import muettinghoven.dienstplan.app.view.ContainerAdapter;
-import muettinghoven.dienstplan.app.view.ContainerView;
+import muettinghoven.dienstplan.app.view.wrapper.ContainerWrapper;
 import muettinghoven.dienstplan.app.view.DienstAdapter;
 import muettinghoven.dienstplan.app.view.DienstDetailActivity;
 import muettinghoven.dienstplan.app.view.MainActivity;
 import muettinghoven.dienstplan.app.view.R;
+import muettinghoven.dienstplan.app.view.wrapper.MainContentWrapper;
 
 public class DienstplanViewController {
 
@@ -68,22 +69,12 @@ public class DienstplanViewController {
         try {
             thread.join();
         }
-        catch (InterruptedException e)
-        {
-
-        }
+        catch (InterruptedException e) {}
     }
 
     private void initialize(){
         try{
-            if(dataCache.isConnected()) {
-                dataCache.loadDataForBewohner(bewohnerId);
-                dataCache.saveToFiles();
-            }
-            else
-            {
-                dataCache.loadFromFiles();
-            }
+            dataCache.loadFromFiles();
             final NavigationView navigationView = (NavigationView) mainActivity.findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(mainActivity);
             final Map<Integer,String> plaene = dataProvider.getDienstplaene(bewohnerId);
@@ -98,32 +89,67 @@ public class DienstplanViewController {
         }
     }
 
-    public void showDienstPlanView(int planId) {
-        final LinearLayout container = (LinearLayout) mainActivity.findViewById(R.id.main_content_wrapper);
-        final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View dienstPlanView = inflater.inflate(R.layout.dienstplan_view,null);
-        try {
-            plan = dataProvider.getPlan(planId);
-            final TextView dienstplanNameTextView = (TextView) dienstPlanView.findViewById(R.id.dienstplanNameTextView);
-            dienstplanNameTextView.setText(plan.getName());
-
-            flipper = (ViewFlipper) dienstPlanView.findViewById(R.id.dienstCategoryViewFlipper);
-
-
-            flipper.addView(containerView("Dienste",plan.getDienste()));
-            for(final Zeiteinheit e : Zeiteinheit.values())
-            {
-                final List<DienstContainer> zeitraeume = plan.getZeitraeume(e);
-                if(!zeitraeume.isEmpty())
-                    flipper.addView(containerView(e.name(),zeitraeume));
+    public void refresh() {
+        mainActivity.setConnectionStatusIcon(R.drawable.cloud_refresh);
+        final Thread refreshThread = new Thread("refresh-thread") {
+            @Override
+            public void run() {
+                try {
+                    if (!dataCache.isConnected()) {
+                        dataCache.loadFromFiles();
+                        mainActivity.setConnectionStatusIcon(R.drawable.cloud_cross);
+                    } else {
+                        dataCache.clear();
+                        dataCache.loadDataForBewohner(bewohnerId);
+                        dataCache.saveToFiles();
+                        final MainContentWrapper wrapper = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
+                        if (wrapper.isBewohner())
+                            showMeineDiensteView();
+                        else {
+                            final int planId = wrapper.getPlanId();
+                            showDienstPlanView(planId);
+                        }
+                        mainActivity.setConnectionStatusIcon(R.drawable.cloud);
+                    }
+                } catch (ServiceException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        catch (ServiceException e) {
-            e.printStackTrace();
-        }
-        if(container.getChildCount() > 1)
-            container.removeViewAt(1);
-        container.addView(dienstPlanView);
+        };
+        refreshThread.start();
+    }
+
+
+    public void showDienstPlanView(final int planId) {
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final MainContentWrapper container = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
+                final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View dienstPlanView = inflater.inflate(R.layout.dienstplan_view,null);
+                try {
+                    plan = dataProvider.getPlan(planId);
+                    final TextView dienstplanNameTextView = (TextView) dienstPlanView.findViewById(R.id.dienstplanNameTextView);
+                    dienstplanNameTextView.setText(plan.getName());
+
+                    flipper = (ViewFlipper) dienstPlanView.findViewById(R.id.dienstCategoryViewFlipper);
+
+
+                    flipper.addView(containerView("Dienste",plan.getDienste()));
+                    for(final Zeiteinheit e : Zeiteinheit.values())
+                    {
+                        final List<DienstContainer> zeitraeume = plan.getZeitraeume(e);
+                        if(!zeitraeume.isEmpty())
+                            flipper.addView(containerView(e.name(),zeitraeume));
+                    }
+                }
+                catch (ServiceException e) {
+                    e.printStackTrace();
+                }
+                container.setPlan(planId);
+                container.setView(dienstPlanView);
+            }
+        });
     }
 
     public boolean flipView(final float direction)
@@ -146,7 +172,7 @@ public class DienstplanViewController {
 
     private View containerView(final String title, final List<DienstContainer> containers) {
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final ContainerView containerView = (ContainerView) inflater.inflate(R.layout.container_view,null);
+        final ContainerWrapper containerView = (ContainerWrapper) inflater.inflate(R.layout.container_view,null);
         containerView.setContainers(containers);
         final TextView containerTypeTextView = (TextView) containerView.findViewById(R.id.containerTypeTextView);
         containerTypeTextView.setText(title);
@@ -160,7 +186,7 @@ public class DienstplanViewController {
         return containerView;
     }
 
-    private void showContainerList(final ContainerView containerView) {
+    private void showContainerList(final ContainerWrapper containerView) {
         final ListView listView = new ListViewCompat(mainActivity);
         final ContainerAdapter adapter = new ContainerAdapter(mainActivity, containerView.getContainers());
         listView.setAdapter(adapter);
@@ -177,7 +203,7 @@ public class DienstplanViewController {
                 return mainActivity.flipView(event);
             }
         });
-        containerView.addView(listView);
+        containerView.setView(listView);
 
         final int aktueller = DienstTools.aktueller(containerView.getContainers());
         listView.setSelection(aktueller);
@@ -219,52 +245,56 @@ public class DienstplanViewController {
             }
         });
 
-        final ContainerView containerView = getContainerView();
-        containerView.addView(singleView);
+        final ContainerWrapper containerView = getContainerView();
+        containerView.setView(singleView);
 
         final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
         listView.setSelection(ersterAktueller);
     }
 
-    private ContainerView getContainerView() {
-        return (ContainerView) flipper.getCurrentView().findViewById(R.id.containerView);
+    private ContainerWrapper getContainerView() {
+        return (ContainerWrapper) flipper.getCurrentView().findViewById(R.id.containerView);
     }
 
     public void showMeineDiensteView() {
-        final LinearLayout container = (LinearLayout) mainActivity.findViewById(R.id.main_content_wrapper);
-        final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View meineDiensteView = inflater.inflate(R.layout.meine_dienste_view,null,false);
-        flipper = null;
-        plan = null;
-        try
-        {
-            final DienstContainer bewohner = dataProvider.getBewohner(bewohnerId);
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final MainContentWrapper container = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
+                final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View meineDiensteView = inflater.inflate(R.layout.meine_dienste_view,null,false);
+                flipper = null;
+                plan = null;
+                try
+                {
+                    final DienstContainer bewohner = dataProvider.getBewohner(bewohnerId);
 
-            final TextView bewohnerNameTextView = (TextView) meineDiensteView.findViewById(R.id.bewohnerNameTextView);
-            bewohnerNameTextView.setText(bewohner.getName());
+                    final TextView bewohnerNameTextView = (TextView) meineDiensteView.findViewById(R.id.bewohnerNameTextView);
+                    bewohnerNameTextView.setText(bewohner.getName());
 
-            final ListView planListView = (ListView) meineDiensteView.findViewById(R.id.dienstAusfuehrungListView);
-            final DienstAdapter adapter = new DienstAdapter(mainActivity);
-            planListView.setAdapter(adapter);
-            planListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
+                    final ListView planListView = (ListView) meineDiensteView.findViewById(R.id.dienstAusfuehrungListView);
+                    final DienstAdapter adapter = new DienstAdapter(mainActivity);
+                    planListView.setAdapter(adapter);
+                    planListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
+                        }
+                    });
+                    final List<DienstAusfuehrung> dienste = bewohner.getAusfuehrungen();
+                    adapter.setDienste(dienste);
+
+                    final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
+                    planListView.setSelection(ersterAktueller);
                 }
-            });
-            final List<DienstAusfuehrung> dienste = bewohner.getAusfuehrungen();
-            adapter.setDienste(dienste);
-
-            final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
-            planListView.setSelection(ersterAktueller);
-        }
-        catch (ServiceException e)
-        {
-            e.printStackTrace();
-        }
-        if(container.getChildCount() > 1)
-            container.removeViewAt(1);
-        container.addView(meineDiensteView);
+                catch (ServiceException e)
+                {
+                    e.printStackTrace();
+                }
+                container.setBewohner();
+                container.setView(meineDiensteView);
+            }
+        });
     }
 
     public boolean onBackPressed() {

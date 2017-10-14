@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DienstplanViewController controller;
 
+    private Menu mainMenu;
+
     private float initialX;
 
     @Override
@@ -52,11 +54,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         controller.initializeAsync();
     }
 
-
-
+    public void setConnectionStatusIcon(final int iconRes) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(mainMenu == null)
+                    return;
+                final MenuItem refreshMenuItem = mainMenu.findItem(R.id.action_refresh);
+                refreshMenuItem.setIcon(iconRes);
+            }
+        });
+    }
 
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
+        this.mainMenu = menu;
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -86,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final int id = item.getItemId();
         switch (id)
         {
+            case R.id.action_refresh:
+                controller.refresh();
             case R.id.action_settings:
                 //TODO: open settings activity
                 return true;
@@ -97,6 +111,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public boolean flipView(MotionEvent event) {
+        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            return false;
         switch (event.getAction())
         {
             case  MotionEvent.ACTION_DOWN:

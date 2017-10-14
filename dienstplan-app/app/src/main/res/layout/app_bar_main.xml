@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<muettinghoven.dienstplan.app.view.wrapper.MainContentWrapper xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content_wrapper"
@@ -9,6 +9,7 @@
     tools:context="muettinghoven.dienstplan.app.view.MainActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/mainAppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -22,4 +23,4 @@
 
     </android.support.design.widget.AppBarLayout>
 
-</android.widget.LinearLayout>
+</muettinghoven.dienstplan.app.view.wrapper.MainContentWrapper>
