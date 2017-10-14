@@ -56,4 +56,10 @@ public class Dienstplan {
                 return containers;
         return Collections.emptyList();
     }
+
+    public void sortContainers() {
+        Collections.sort(dienste);
+        for(final List<DienstContainer> containers : zeitraeume.values())
+            Collections.sort(containers);
+    }
 }

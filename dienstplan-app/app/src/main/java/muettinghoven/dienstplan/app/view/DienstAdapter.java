@@ -17,11 +17,11 @@ public class DienstAdapter extends BaseAdapter {
 
     private List<DienstAusfuehrung> dienste;
 
-    private final LayoutInflater inflater;
+    private final Context context;
 
     public DienstAdapter(final Context context, final List<DienstAusfuehrung> dienste)
     {
-        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
         this.dienste = dienste;
     }
 
@@ -51,6 +51,7 @@ public class DienstAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.dienst_item_view,null);
         final TextView dienstNameTextView = (TextView) view.findViewById(R.id.dienstNameTextView);
         final TextView bewohnerTextView = (TextView) view.findViewById(R.id.bewohnerNameTextView);
@@ -60,6 +61,13 @@ public class DienstAdapter extends BaseAdapter {
         dienstNameTextView.setText(dienst.getDienst());
         bewohnerTextView.setText(dienst.getBewohner());
         zeitraumTextView.setText(dienst.getZeitraum());
+        if(dienst.isAktuell())
+        {
+            final int color = context.getResources().getColor(R.color.aktuell);
+            dienstNameTextView.setTextColor(color);
+            bewohnerTextView.setTextColor(color);
+            zeitraumTextView.setTextColor(color);
+        }
 
         return view;
     }

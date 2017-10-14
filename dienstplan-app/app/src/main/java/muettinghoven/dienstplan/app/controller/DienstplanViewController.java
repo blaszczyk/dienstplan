@@ -24,6 +24,7 @@ import muettinghoven.dienstplan.app.model.Dienstplan;
 import muettinghoven.dienstplan.app.service.DataCache;
 import muettinghoven.dienstplan.app.service.DataProvider;
 import muettinghoven.dienstplan.app.service.ServiceException;
+import muettinghoven.dienstplan.app.tools.DienstTools;
 import muettinghoven.dienstplan.app.view.ContainerAdapter;
 import muettinghoven.dienstplan.app.view.ContainerView;
 import muettinghoven.dienstplan.app.view.DienstAdapter;
@@ -158,12 +159,14 @@ public class DienstplanViewController {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                containerView.removeView(listView);
                 final DienstContainer container = (DienstContainer) adapter.getItem(position);
                 showSingleContainer(container);
             }
         });
         containerView.addView(listView);
+
+        final int aktueller = DienstTools.aktueller(containerView.getContainers());
+        listView.setSelection(aktueller);
     }
 
     private void showContainerList() {
@@ -177,7 +180,7 @@ public class DienstplanViewController {
 
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final LinearLayout singleView = (LinearLayout) inflater.inflate(R.layout.single_view,null);
-        final TextView containerTypeTextView = (TextView) singleView.findViewById(R.id.containerTypeTextView);
+        final TextView containerTypeTextView = (TextView) singleView.findViewById(R.id.containerNameTextView);
         containerTypeTextView.setText(title);
         containerTypeTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,7 +190,7 @@ public class DienstplanViewController {
             }
         });
 
-        final ListView listView = new ListViewCompat(mainActivity);
+        final ListView listView = (ListView) singleView.findViewById(R.id.dienstAusfuehrungListView);
         final DienstAdapter adapter = new DienstAdapter(mainActivity, dienste);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -196,8 +199,10 @@ public class DienstplanViewController {
                 startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
             }
         });
-        singleView.addView(listView);
         containerView.addView(singleView);
+
+        final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
+        listView.setSelection(ersterAktueller);
     }
 
     private ContainerView getContainerView() {
@@ -217,7 +222,7 @@ public class DienstplanViewController {
             final TextView bewohnerNameTextView = (TextView) meineDiensteView.findViewById(R.id.bewohnerNameTextView);
             bewohnerNameTextView.setText(bewohner.getName());
 
-            final ListView planListView = (ListView) meineDiensteView.findViewById(R.id.dienstausfuehrungListView);
+            final ListView planListView = (ListView) meineDiensteView.findViewById(R.id.dienstAusfuehrungListView);
             final DienstAdapter adapter = new DienstAdapter(mainActivity);
             planListView.setAdapter(adapter);
             planListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -228,6 +233,9 @@ public class DienstplanViewController {
             });
             final List<DienstAusfuehrung> dienste = bewohner.getAusfuehrungen();
             adapter.setDienste(dienste);
+
+            final int ersterAktueller = DienstTools.findErsterAktueller(dienste);
+            planListView.setSelection(ersterAktueller);
         }
         catch (ServiceException e)
         {

@@ -1,6 +1,7 @@
 package muettinghoven.dienstplan.app.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,20 @@ import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 import muettinghoven.dienstplan.app.tools.DienstTools;
 
 public class DataProvider {
+
+    private final Comparator<DienstAusfuehrung> BY_DATUM = new Comparator<DienstAusfuehrung>() {
+        @Override
+        public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
+            return Long.compare(a1.getAnfangszeit(),a2.getAnfangszeit());
+        }
+    };
+
+    private  final Comparator<DienstAusfuehrung> BY_DIENST = new Comparator<DienstAusfuehrung>() {
+        @Override
+        public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
+            return a1.getDienst().compareTo(a2.getDienst());
+        }
+    };
 
     private final DataCache provider;
 
@@ -48,8 +63,13 @@ public class DataProvider {
                 dienst.add(ausfuehrung);
                 zeitraeume.get(ausfuehrungDto.getZeitraumId()).add(ausfuehrung);
             }
+            dienst.sort(BY_DATUM);
         }
 
+        for(final DienstContainer zeitraum : dienste.values())
+            zeitraum.sort(BY_DIENST);
+
+        plan.sortContainers();
         return plan;
     }
 
@@ -67,7 +87,7 @@ public class DataProvider {
             final DienstAusfuehrung dienstAusfuehrung = new DienstAusfuehrung(dto,bewohnerDto,dienst,zeitraum);
             bewohner.add(dienstAusfuehrung);
         }
-
+        bewohner.sort(BY_DATUM);
         return bewohner;
     }
 

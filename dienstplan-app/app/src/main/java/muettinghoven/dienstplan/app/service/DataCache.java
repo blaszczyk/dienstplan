@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
@@ -49,11 +50,11 @@ public class DataCache
 
     private final OtherService otherService;
 
-    private final Map<Integer,BewohnerDto> bewohner = new HashMap<>();
-    private final Map<Integer,DienstplanDto> dienstplaene = new HashMap<>();
-    private final Map<Integer,DienstDto> dienste = new HashMap<>();
-    private final Map<Integer,ZeitraumDto> zeitraeume = new HashMap<>();
-    private final Map<Integer, DienstAusfuehrungDto> dienstausfuehrungen = new HashMap<>();
+    private final Map<Integer,BewohnerDto> bewohner = new TreeMap<>();
+    private final Map<Integer,DienstplanDto> dienstplaene = new TreeMap<>();
+    private final Map<Integer,DienstDto> dienste = new TreeMap<>();
+    private final Map<Integer,ZeitraumDto> zeitraeume = new TreeMap<>();
+    private final Map<Integer, DienstAusfuehrungDto> dienstausfuehrungen = new TreeMap<>();
 
     public DataCache(final String baseUrl, final File baseDir)
     {

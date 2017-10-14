@@ -26,12 +26,16 @@ public class DienstAusfuehrung implements Serializable {
 
     private final String kommentar;
 
+    private final long anfangszeit;
+
+    private boolean aktuell;
+
     public DienstAusfuehrung(final DienstAusfuehrungDto ausfuehrung, final BewohnerDto bewohner, final DienstDto dienst, final ZeitraumDto zeitraum)
     {
-        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar());
+        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar(), zeitraum.getAnfangsdatum(), DienstTools.isAktuell(zeitraum));
     }
 
-    public DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar)
+    public DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar, final long anfangszeit, final boolean aktuell)
     {
         this.id = id;
         this.bewohner = bewohner;
@@ -39,6 +43,8 @@ public class DienstAusfuehrung implements Serializable {
         this.dienstBeschreibung = dienstBeschreibung;
         this.zeitraum = zeitraum;
         this.kommentar = kommentar;
+        this.anfangszeit = anfangszeit;
+        this.aktuell = aktuell;
     }
 
     public int getId()
@@ -68,6 +74,14 @@ public class DienstAusfuehrung implements Serializable {
     public String getKommentar()
     {
         return kommentar;
+    }
+
+    public long getAnfangszeit() {
+        return anfangszeit;
+    }
+
+    public boolean isAktuell() {
+        return aktuell;
     }
 
     @Override
