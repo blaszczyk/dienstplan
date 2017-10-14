@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="aktuell">#FF0000</color>
+    <color name="colorCloud">#FFFFFF</color>
+    <color name="colorCross">#FF0000</color>
+    <color name="colorRefresh">#00EE00</color>
 </resources>

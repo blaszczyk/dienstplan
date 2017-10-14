@@ -6,8 +6,8 @@
     android:viewportWidth="48.0">
     <path
         android:name="cross_path"
-        android:pathData="M12,16 36,40 M12,40 36,16"
-        android:strokeColor="#ff4444"
+        android:pathData="M10,14 38,42 M10,44 38,14"
+        android:strokeColor="@color/colorCross"
         android:strokeWidth="7"
         android:strokeLineCap="round"/>
 </vector>

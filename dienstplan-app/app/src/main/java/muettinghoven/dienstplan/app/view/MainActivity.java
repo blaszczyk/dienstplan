@@ -17,8 +17,10 @@ import muettinghoven.dienstplan.app.controller.DienstplanViewController;
 
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnTouchListener
 {
+
+    private boolean visible = true;
 
     private DienstplanViewController controller;
 
@@ -38,13 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         final CustomDrawer drawer = (CustomDrawer) findViewById(R.id.drawer_layout);
-        drawer.addOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return flipView(event);
-            }
-        });
-
+        drawer.addOnTouchListener(this);
 
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -62,8 +58,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 final MenuItem refreshMenuItem = mainMenu.findItem(R.id.action_refresh);
                 refreshMenuItem.setIcon(iconRes);
+                refreshMenuItem.getIcon();
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        visible = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        visible = true;
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
     @Override
@@ -80,11 +93,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if(!controller.onBackPressed()) {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
     }
 
     @Override
@@ -110,22 +118,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean flipView(MotionEvent event) {
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            return false;
-        switch (event.getAction())
-        {
-            case  MotionEvent.ACTION_DOWN:
-                initialX = event.getX();
-                return false;
-            case MotionEvent.ACTION_UP:
-                final float direction = event.getX() - initialX;
-                return controller.flipView(direction);
-        }
-        return false;
-    }
-
     @Override
     public boolean onNavigationItemSelected(final MenuItem item) {
         final int id = item.getItemId();
@@ -143,4 +135,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    @Override
+    public boolean onTouch(final View v, final MotionEvent event) {
+        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            return false;
+        switch (event.getAction())
+        {
+            case  MotionEvent.ACTION_DOWN:
+                initialX = event.getX();
+                return true;
+            case MotionEvent.ACTION_UP:
+                final float direction = event.getX() - initialX;
+                return controller.flipView(direction);
+        }
+        return false;
+    }
 }

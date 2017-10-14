@@ -13,7 +13,7 @@ public class MainContentWrapper extends AbstractWrapper {
 
     private static final int BEWOHNER = 346236523;
 
-    private int id = -1;
+    private int id = BEWOHNER;
 
     public MainContentWrapper(Context context) {
         super(context);

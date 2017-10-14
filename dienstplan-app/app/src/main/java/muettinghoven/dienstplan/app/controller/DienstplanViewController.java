@@ -7,7 +7,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v7.widget.ListViewCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -36,7 +35,7 @@ import muettinghoven.dienstplan.app.view.wrapper.MainContentWrapper;
 
 public class DienstplanViewController {
 
-    private static final float SWIPE_SENSITIVITY = 50;
+    private static final float SWIPE_SENSITIVITY = 150;
 
     private final MainActivity mainActivity;
 
@@ -82,11 +81,24 @@ public class DienstplanViewController {
             {
                 navigationView.getMenu().add(0, Menu.FIRST + e.getKey(), Menu.NONE,e.getValue()).setIcon(R.drawable.ic_menu_send);
             }
-            showMeineDiensteView();
+            refresh();
         }
         catch (ServiceException e) {
             e.printStackTrace();
         }
+        new Thread("check-connection-thread") {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (Exception e) {
+                    }
+                    if(mainActivity.isVisible())
+                        checkConnection();
+                }
+            }
+        }.start();
     }
 
     public void refresh() {
@@ -119,6 +131,11 @@ public class DienstplanViewController {
         refreshThread.start();
     }
 
+    public void checkConnection() {
+        final int iconRes = dataCache.isConnected() ? R.drawable.cloud : R.drawable.cloud_cross;
+        mainActivity.setConnectionStatusIcon(iconRes);
+    }
+
 
     public void showDienstPlanView(final int planId) {
         mainActivity.runOnUiThread(new Runnable() {
@@ -127,14 +144,14 @@ public class DienstplanViewController {
                 final MainContentWrapper container = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
                 final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 final View dienstPlanView = inflater.inflate(R.layout.dienstplan_view,null);
+                dienstPlanView.setOnTouchListener(mainActivity);
                 try {
                     plan = dataProvider.getPlan(planId);
                     final TextView dienstplanNameTextView = (TextView) dienstPlanView.findViewById(R.id.dienstplanNameTextView);
                     dienstplanNameTextView.setText(plan.getName());
 
                     flipper = (ViewFlipper) dienstPlanView.findViewById(R.id.dienstCategoryViewFlipper);
-
-
+                    flipper.setOnTouchListener(mainActivity);
                     flipper.addView(containerView("Dienste",plan.getDienste()));
                     for(final Zeiteinheit e : Zeiteinheit.values())
                     {
@@ -146,6 +163,7 @@ public class DienstplanViewController {
                 catch (ServiceException e) {
                     e.printStackTrace();
                 }
+                container.setOnTouchListener(mainActivity);
                 container.setPlan(planId);
                 container.setView(dienstPlanView);
             }
@@ -174,6 +192,7 @@ public class DienstplanViewController {
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final ContainerWrapper containerView = (ContainerWrapper) inflater.inflate(R.layout.container_view,null);
         containerView.setContainers(containers);
+        containerView.setOnTouchListener(mainActivity);
         final TextView containerTypeTextView = (TextView) containerView.findViewById(R.id.containerTypeTextView);
         containerTypeTextView.setText(title);
         containerTypeTextView.setOnClickListener(new View.OnClickListener() {
@@ -197,12 +216,7 @@ public class DienstplanViewController {
                 showSingleContainer(container);
             }
         });
-        listView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return mainActivity.flipView(event);
-            }
-        });
+        listView.setOnTouchListener(mainActivity);
         containerView.setView(listView);
 
         final int aktueller = DienstTools.aktueller(containerView.getContainers());
@@ -218,6 +232,7 @@ public class DienstplanViewController {
 
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final LinearLayout singleView = (LinearLayout) inflater.inflate(R.layout.single_view,null);
+        singleView.setOnTouchListener(mainActivity);
         final TextView containerTypeTextView = (TextView) singleView.findViewById(R.id.containerNameTextView);
         containerTypeTextView.setText(title);
         containerTypeTextView.setOnClickListener(new View.OnClickListener() {
@@ -238,12 +253,7 @@ public class DienstplanViewController {
                 startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
             }
         });
-        listView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return mainActivity.flipView(event);
-            }
-        });
+        listView.setOnTouchListener(mainActivity);
 
         final ContainerWrapper containerView = getContainerView();
         containerView.setView(singleView);

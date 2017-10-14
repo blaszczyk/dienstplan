@@ -13,6 +13,6 @@
         c5.5,0, 10,-4, 10,-10,
         C48,25, 44,20, 38,20,
         z"
-        android:fillColor="#FFFFFF"/>
+        android:fillColor="@color/colorCloud"/>
 </vector>
 
