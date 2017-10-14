@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
-import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.controller.DienstplanViewController;
 
 

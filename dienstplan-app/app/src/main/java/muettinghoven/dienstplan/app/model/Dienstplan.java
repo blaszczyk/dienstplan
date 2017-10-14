@@ -1,6 +1,7 @@
 package muettinghoven.dienstplan.app.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -47,4 +48,12 @@ public class Dienstplan {
         zeitraeume.get(einheit).add(zeitraum);
     }
 
+    public List<DienstContainer> getContainingList(final DienstContainer container) {
+        if(dienste.contains(container))
+            return dienste;
+        for(final List<DienstContainer> containers : zeitraeume.values())
+            if (containers.contains(container))
+                return containers;
+        return Collections.emptyList();
+    }
 }

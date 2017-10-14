@@ -9,8 +9,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import muettinghoven.dienstplan.R;
-
 public class CustomDrawer extends DrawerLayout {
 
     private final List<OnTouchListener> listeners = new ArrayList<>();

@@ -17,7 +17,6 @@ import android.widget.ViewFlipper;
 import java.util.List;
 import java.util.Map;
 
-import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.dto.Zeiteinheit;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 import muettinghoven.dienstplan.app.model.DienstContainer;
@@ -26,9 +25,11 @@ import muettinghoven.dienstplan.app.service.DataCache;
 import muettinghoven.dienstplan.app.service.DataProvider;
 import muettinghoven.dienstplan.app.service.ServiceException;
 import muettinghoven.dienstplan.app.view.ContainerAdapter;
+import muettinghoven.dienstplan.app.view.ContainerView;
 import muettinghoven.dienstplan.app.view.DienstAdapter;
 import muettinghoven.dienstplan.app.view.DienstDetailActivity;
 import muettinghoven.dienstplan.app.view.MainActivity;
+import muettinghoven.dienstplan.app.view.R;
 
 public class DienstplanViewController {
 
@@ -41,6 +42,8 @@ public class DienstplanViewController {
     private final DataCache dataCache;
 
     private ViewFlipper flipper;
+
+    private Dienstplan plan;
 
     //TODO: load from preferences
     private int bewohnerId = 1;
@@ -98,7 +101,7 @@ public class DienstplanViewController {
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View dienstPlanView = inflater.inflate(R.layout.dienstplan_view,null);
         try {
-            final Dienstplan plan = dataProvider.getPlan(planId);
+            plan = dataProvider.getPlan(planId);
             final TextView dienstplanNameTextView = (TextView) dienstPlanView.findViewById(R.id.dienstplanNameTextView);
             dienstplanNameTextView.setText(plan.getName());
 
@@ -125,36 +128,80 @@ public class DienstplanViewController {
     {
         if(flipper == null || Math.abs(direction) < SWIPE_SENSITIVITY)
             return;
-        if(direction < 0)
+        if(direction < 0) {
+            flipper.setInAnimation(mainActivity, R.anim.in_from_right);
+            flipper.setOutAnimation(mainActivity,R.anim.out_to_left);
             flipper.showPrevious();
-        else
+        }
+        else {
+            flipper.setInAnimation(mainActivity, R.anim.in_from_left);
+            flipper.setOutAnimation(mainActivity,R.anim.out_to_right);
             flipper.showNext();
+        }
+        showContainerList();
     }
 
     private View containerView(final String title, final List<DienstContainer> containers) {
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final LinearLayout containerView = (LinearLayout) inflater.inflate(R.layout.dienste_container,null);
+        final ContainerView containerView = (ContainerView) inflater.inflate(R.layout.container_view,null);
+        containerView.setContainers(containers);
         final TextView containerTypeTextView = (TextView) containerView.findViewById(R.id.containerTypeTextView);
         containerTypeTextView.setText(title);
+        showContainerList(containerView);
+        return containerView;
+    }
+
+    private void showContainerList(final ContainerView containerView) {
         final ListView listView = new ListViewCompat(mainActivity);
-        final ContainerAdapter adapter = new ContainerAdapter(mainActivity, containers);
+        final ContainerAdapter adapter = new ContainerAdapter(mainActivity, containerView.getContainers());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                containerView.removeView(listView);
                 final DienstContainer container = (DienstContainer) adapter.getItem(position);
-                final List<DienstAusfuehrung> dienste = container.getAusfuehrungen();
-                final String title = container.getName();
-                containerView.removeView(listView);
-
-                final ListView listView = new ListViewCompat(mainActivity);
-                final DienstAdapter adapter = new DienstAdapter(mainActivity, dienste);
-                listView.setAdapter(adapter);
-                containerView.addView(listView);
+                showSingleContainer(container);
             }
         });
         containerView.addView(listView);
-        return containerView;
+    }
+
+    private void showContainerList() {
+        showContainerList(getContainerView());
+    }
+
+    private void showSingleContainer(final DienstContainer container) {
+        final ContainerView containerView = getContainerView();
+        final List<DienstAusfuehrung> dienste = container.getAusfuehrungen();
+        final String title = container.getName();
+
+        final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final LinearLayout singleView = (LinearLayout) inflater.inflate(R.layout.single_view,null);
+        final TextView containerTypeTextView = (TextView) singleView.findViewById(R.id.containerTypeTextView);
+        containerTypeTextView.setText(title);
+        containerTypeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final List<DienstContainer> containers = plan.getContainingList(container);
+                showContainerList();
+            }
+        });
+
+        final ListView listView = new ListViewCompat(mainActivity);
+        final DienstAdapter adapter = new DienstAdapter(mainActivity, dienste);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
+            }
+        });
+        singleView.addView(listView);
+        containerView.addView(singleView);
+    }
+
+    private ContainerView getContainerView() {
+        return (ContainerView) flipper.getCurrentView().findViewById(R.id.containerView);
     }
 
     public void showMeineDiensteView() {
@@ -162,6 +209,7 @@ public class DienstplanViewController {
         final LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View meineDiensteView = inflater.inflate(R.layout.meine_dienste_view,null,false);
         flipper = null;
+        plan = null;
         try
         {
             final DienstContainer bewohner = dataProvider.getBewohner(bewohnerId);
@@ -175,10 +223,7 @@ public class DienstplanViewController {
             planListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    final DienstAusfuehrung dienst = (DienstAusfuehrung) adapter.getItem(position);
-                    final Intent dienstDetailView = new Intent(mainActivity,DienstDetailActivity.class);
-                    dienstDetailView.putExtra(DienstDetailActivity.DIENST_AUSFUEHRUNG,dienst);
-                    mainActivity.startActivity(dienstDetailView);
+                    startDienstAusfuehrungActivity((DienstAusfuehrung) adapter.getItem(position));
                 }
             });
             final List<DienstAusfuehrung> dienste = bewohner.getAusfuehrungen();
@@ -191,6 +236,12 @@ public class DienstplanViewController {
         if(container.getChildCount() > 1)
             container.removeViewAt(1);
         container.addView(meineDiensteView);
+    }
+
+    private void startDienstAusfuehrungActivity(final DienstAusfuehrung ausfuehrung) {
+        final Intent dienstDetailView = new Intent(mainActivity,DienstDetailActivity.class);
+        dienstDetailView.putExtra(DienstDetailActivity.DIENST_AUSFUEHRUNG,ausfuehrung);
+        mainActivity.startActivity(dienstDetailView);
     }
 
     public void openWebUi(){

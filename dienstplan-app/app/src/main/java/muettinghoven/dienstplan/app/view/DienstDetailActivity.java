@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 
 public class DienstDetailActivity extends AppCompatActivity {

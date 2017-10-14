@@ -10,7 +10,6 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.List;
 
-import muettinghoven.dienstplan.R;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 
 
