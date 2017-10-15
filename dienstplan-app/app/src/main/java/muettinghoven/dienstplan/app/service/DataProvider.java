@@ -62,6 +62,8 @@ public class DataProvider {
 
                 dienst.add(ausfuehrung);
                 zeitraeume.get(ausfuehrungDto.getZeitraumId()).add(ausfuehrung);
+                if(ausfuehrung.isAktuell())
+                    plan.addAktueller(ausfuehrung);
             }
             dienst.sort(BY_DATUM);
         }
@@ -70,6 +72,7 @@ public class DataProvider {
             zeitraum.sort(BY_DIENST);
 
         plan.sortContainers();
+        plan.sortAktuell(BY_DATUM);
         return plan;
     }
 

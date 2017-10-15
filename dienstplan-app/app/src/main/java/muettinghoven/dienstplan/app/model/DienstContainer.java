@@ -12,7 +12,8 @@ public class DienstContainer implements Comparable<DienstContainer>{
     public static enum Typ {
         DIENST,
         ZEITRAUM,
-        BEWOHNER;
+        BEWOHNER,
+        AKTUELL;
     }
 
     private final int id;
