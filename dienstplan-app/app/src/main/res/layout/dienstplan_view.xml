@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:text="DienstplanName"
         android:textAlignment="center"
-        android:textSize="38sp" />
+        android:textSize="@dimen/dienstplan_name_font_size" />
 
     <ViewFlipper
         android:id="@+id/dienstCategoryViewFlipper"

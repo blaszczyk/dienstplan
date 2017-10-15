@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:text="ContainerName"
         android:textAlignment="center"
-        android:textSize="30sp" />
+        android:textSize="@dimen/container_name_font_size" />
 
     <ListView
         android:id="@+id/dienstAusfuehrungListView"

@@ -157,7 +157,7 @@ public class DienstplanViewController {
                     {
                         final List<DienstContainer> zeitraeume = plan.getZeitraeume(e);
                         if(!zeitraeume.isEmpty())
-                            flipper.addView(containerView(e.name(),zeitraeume));
+                            flipper.addView(containerView(DienstTools.einheitName(e),zeitraeume));
                     }
                 }
                 catch (ServiceException e) {

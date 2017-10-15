@@ -5,4 +5,8 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="dienstplan_name_font_size">38sp</dimen>
+    <dimen name="container_type_font_size">34sp</dimen>
+    <dimen name="container_name_font_size">30sp</dimen>
 </resources>

@@ -1,20 +1,15 @@
 package muettinghoven.dienstplan.app.view;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 import muettinghoven.dienstplan.app.model.DienstContainer;
 
 
@@ -48,11 +43,13 @@ public class ContainerAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final TextView view = new TextView(context);
-        view.setText(containers.get(position).getName());
-        view.setTextSize(26);
-        view.setTextColor(Color.BLACK);
-        view.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        return view;
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final LinearLayout containerItemView = (LinearLayout) inflater.inflate(R.layout.container_item_view,null);
+        final TextView containerNameTextView = (TextView) containerItemView.findViewById(R.id.containerNameTextView);
+        final DienstContainer container = containers.get(position);
+        containerNameTextView.setText(container.getName());
+        if(container.isAktuell() && container.getTyp() == DienstContainer.Typ.ZEITRAUM)
+            containerNameTextView.setTextColor(context.getResources().getColor(R.color.aktuell));
+        return containerItemView;
     }
 }

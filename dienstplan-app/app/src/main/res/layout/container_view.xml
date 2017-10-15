@@ -10,5 +10,5 @@
         android:layout_height="wrap_content"
         android:text="TextView"
         android:textAlignment="center"
-        android:textSize="34sp" />
+        android:textSize="@dimen/container_type_font_size" />
 </muettinghoven.dienstplan.app.view.wrapper.ContainerWrapper>
