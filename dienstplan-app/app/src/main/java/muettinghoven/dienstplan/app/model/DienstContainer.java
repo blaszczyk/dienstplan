@@ -22,12 +22,15 @@ public class DienstContainer implements Comparable<DienstContainer>{
 
     private final Typ typ;
 
+    private final int ordnung;
+
     private final List<DienstAusfuehrung> ausfuehrungen;
 
-    public DienstContainer(final int id, final String name, final Typ typ) {
+    public DienstContainer(final int id, final String name, final Typ typ, final int ordnung) {
         this.id = id;
         this.name = name;
         this.typ = typ;
+        this.ordnung = ordnung;
         this.ausfuehrungen = new ArrayList<>();
     }
 
@@ -47,12 +50,35 @@ public class DienstContainer implements Comparable<DienstContainer>{
         return typ;
     }
 
+    public int getOrdnung() {
+        return ordnung;
+    }
+
     public List<DienstAusfuehrung> getAusfuehrungen() {
         return ausfuehrungen;
     }
 
     public void sort(Comparator<? super DienstAusfuehrung> comparator) {
         Collections.sort(ausfuehrungen,comparator);
+    }
+
+    public void klumpeAktuelle() {
+        int lastAktuell = -1;
+        for(int i = ausfuehrungen.size() - 1; i >= 0; i--) {
+            final DienstAusfuehrung ausfuehrung = ausfuehrungen.get(i);
+            if (ausfuehrung.isAktuell()) {
+                if (i < lastAktuell - 1)
+                    moveTo(i,lastAktuell - 1);
+                lastAktuell = i;
+            }
+        }
+    }
+
+    private void moveTo(final int from, final int to) {
+        final DienstAusfuehrung mover = ausfuehrungen.get(from);
+        for(int i = from; i < to; i++)
+            ausfuehrungen.set(i,ausfuehrungen.get(i+1));
+        ausfuehrungen.set(to,mover);
     }
 
     public boolean isAktuell() {
@@ -64,7 +90,7 @@ public class DienstContainer implements Comparable<DienstContainer>{
 
     @Override
     public int compareTo(@NonNull final DienstContainer that) {
-        return Integer.compare(this.id,that.id);
+        return Integer.compare(this.ordnung,that.ordnung);
     }
 
 }

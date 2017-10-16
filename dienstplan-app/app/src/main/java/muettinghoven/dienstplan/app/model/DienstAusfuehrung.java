@@ -28,14 +28,16 @@ public class DienstAusfuehrung implements Serializable {
 
     private final long anfangszeit;
 
+    private final int dienstOrdnung;
+
     private boolean aktuell;
 
     public DienstAusfuehrung(final DienstAusfuehrungDto ausfuehrung, final BewohnerDto bewohner, final DienstDto dienst, final ZeitraumDto zeitraum)
     {
-        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar(), zeitraum.getAnfangsdatum(), DienstTools.isAktuell(zeitraum));
+        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar(), zeitraum.getAnfangsdatum(), dienst.getOrdnung(), DienstTools.isAktuell(zeitraum));
     }
 
-    public DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar, final long anfangszeit, final boolean aktuell)
+    private DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar, final long anfangszeit, final int dienstOrdnung, final boolean aktuell)
     {
         this.id = id;
         this.bewohner = bewohner;
@@ -44,6 +46,7 @@ public class DienstAusfuehrung implements Serializable {
         this.zeitraum = zeitraum;
         this.kommentar = kommentar;
         this.anfangszeit = anfangszeit;
+        this.dienstOrdnung = dienstOrdnung;
         this.aktuell = aktuell;
     }
 
@@ -78,6 +81,10 @@ public class DienstAusfuehrung implements Serializable {
 
     public long getAnfangszeit() {
         return anfangszeit;
+    }
+
+    public int getDienstOrdnung() {
+        return dienstOrdnung;
     }
 
     public boolean isAktuell() {

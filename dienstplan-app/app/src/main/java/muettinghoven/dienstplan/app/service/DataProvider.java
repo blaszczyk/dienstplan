@@ -21,6 +21,16 @@ public class DataProvider {
         }
     };
 
+    private final Comparator<DienstAusfuehrung> BY_AKTUALITAET = new Comparator<DienstAusfuehrung>() {
+        @Override
+        public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
+            final int compare = Long.compare(a1.getAnfangszeit(),a2.getAnfangszeit());
+            if(compare != 0)
+                return compare;
+            return Integer.compare(a1.getDienstOrdnung(),a2.getDienstOrdnung());
+        }
+    };
+
     private  final Comparator<DienstAusfuehrung> BY_DIENST = new Comparator<DienstAusfuehrung>() {
         @Override
         public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
@@ -42,7 +52,7 @@ public class DataProvider {
         for(final int zeitraumId : planDto.getZeitraumsIds())
         {
             final ZeitraumDto zeitraumDto = provider.getZetiraum(zeitraumId);
-            final DienstContainer zeitraum = new DienstContainer(zeitraumId, DienstTools.zeitraum(zeitraumDto), DienstContainer.Typ.ZEITRAUM);
+            final DienstContainer zeitraum = new DienstContainer(zeitraumId, DienstTools.zeitraum(zeitraumDto), DienstContainer.Typ.ZEITRAUM, DienstTools.ordnung(zeitraumDto));
             plan.addZeitraum(zeitraumDto.getZeiteinheit(),zeitraum);
             zeitraeume.put(zeitraumId,zeitraum);
         }
@@ -51,7 +61,7 @@ public class DataProvider {
         for(final int dienstId : planDto.getDienstsIds())
         {
             final DienstDto dienstDto = provider.getDienst(dienstId);
-            final DienstContainer dienst = new DienstContainer(dienstId, dienstDto.getName(), DienstContainer.Typ.DIENST);
+            final DienstContainer dienst = new DienstContainer(dienstId, dienstDto.getName(), DienstContainer.Typ.DIENST, dienstDto.getOrdnung());
             plan.addDienst(dienst);
             for(final int ausfuehrungId : dienstDto.getDienstAusfuehrungsIds())
             {
@@ -72,14 +82,14 @@ public class DataProvider {
             zeitraum.sort(BY_DIENST);
 
         plan.sortContainers();
-        plan.sortAktuell(BY_DATUM);
+        plan.sortAktuell(BY_AKTUALITAET);
         return plan;
     }
 
     public DienstContainer getBewohner(final int bewohnerID) throws ServiceException
     {
         final BewohnerDto bewohnerDto = provider.getBewohner(bewohnerID);
-        final DienstContainer bewohner = new DienstContainer(bewohnerID,bewohnerDto.getName(), DienstContainer.Typ.BEWOHNER);
+        final DienstContainer bewohner = new DienstContainer(bewohnerID,bewohnerDto.getName(), DienstContainer.Typ.BEWOHNER, bewohnerID);
 
         final int[] ids = bewohnerDto.getDienstAusfuehrungsIds();
         final List<DienstAusfuehrungDto> dtos = provider.getDienstausfuehrung(toList(ids));
@@ -90,7 +100,8 @@ public class DataProvider {
             final DienstAusfuehrung dienstAusfuehrung = new DienstAusfuehrung(dto,bewohnerDto,dienst,zeitraum);
             bewohner.add(dienstAusfuehrung);
         }
-        bewohner.sort(BY_DATUM);
+        bewohner.sort(BY_AKTUALITAET);
+        bewohner.klumpeAktuelle();
         return bewohner;
     }
 

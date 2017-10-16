@@ -20,7 +20,7 @@ public class Dienstplan {
     public Dienstplan(int id, String name) {
         this.id = id;
         this.name = name;
-        aktuell = new DienstContainer(0,"Aktuell", DienstContainer.Typ.AKTUELL);
+        aktuell = new DienstContainer(0,"Aktuell", DienstContainer.Typ.AKTUELL, 0);
         dienste = new ArrayList<>();
         zeitraeume = new EnumMap<Zeiteinheit, List<DienstContainer>>(Zeiteinheit.class);
         for(final Zeiteinheit einheit : Zeiteinheit.values())
@@ -76,5 +76,6 @@ public class Dienstplan {
 
     public void sortAktuell(final Comparator<? super DienstAusfuehrung> comparator) {
         aktuell.sort(comparator);
+        aktuell.klumpeAktuelle();
     }
 }

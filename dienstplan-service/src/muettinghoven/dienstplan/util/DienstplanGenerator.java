@@ -42,42 +42,52 @@ public class DienstplanGenerator
 	public void generiereBis(final Date endDatum) throws RoseException
 	{
 		for(final Zeiteinheit einheit : zeiteinheiten)
-		{
-			final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
-					.stream()
-					.filter(z -> z.getZeiteinheit().equals(einheit))
-					.max(BY_ANFANGSDATUM);
-			Date datum ;
-			if(optZeitraum.isPresent())
-				datum = optZeitraum.get().getAnfangsdatum();
-			else
-			{
-				datum = new Date();
-				addZeitraum(datum, einheit);
-			}
-			while(datum.before(endDatum))
-			{
-				datum = nextDatum(datum, einheit);
-				addZeitraum(datum, einheit);
-			}
-		}
+			generiereZeitraeume(endDatum, einheit);
 		
 		for(final Dienst dienst : plan.getDiensts())
+			generiereDienstausfuehrungen(dienst);
+	}
+
+	private void generiereDienstausfuehrungen(final Dienst dienst) throws RoseException {
+		final Optional<DienstAusfuehrung> optAusfuehrung = dienst.getDienstAusfuehrungs()
+				.stream()
+				.max(AUSFUEHRUNG_BY_ANFANGSDATUM);
+		final DienstAusfuehrung ausfuehrung;
+		if(optAusfuehrung.isPresent())
+			ausfuehrung = optAusfuehrung.get();
+		else
+			ausfuehrung = createDienstAusfuehrung(dienst, firstZeitraum(dienst.getZeiteinheit()));
+		Zeitraum zeitraum = next(ausfuehrung.getZeitraum());
+		int skip = 0;
+		while(zeitraum != null)
 		{
-			final Optional<DienstAusfuehrung> optAusfuehrung = dienst.getDienstAusfuehrungs()
-					.stream()
-					.max(AUSFUEHRUNG_BY_ANFANGSDATUM);
-			final DienstAusfuehrung ausfuehrung;
-			if(optAusfuehrung.isPresent())
-				ausfuehrung = optAusfuehrung.get();
-			else
-				ausfuehrung = createDienstAusfuehrung(dienst, firstZeitraum(dienst.getZeiteinheit()));
-			Zeitraum zeitraum = next(ausfuehrung.getZeitraum());
-			while(zeitraum != null)
+			skip++;
+			if(skip == dienst.getIntervall().intValue())
 			{
-				final DienstAusfuehrung nextAusfuehrung = createDienstAusfuehrung(dienst, zeitraum);
-				zeitraum = next(nextAusfuehrung.getZeitraum());
+				createDienstAusfuehrung(dienst, zeitraum);
+				skip = 0;
 			}
+			zeitraum = next(zeitraum);
+		}
+	}
+
+	private void generiereZeitraeume(final Date endDatum, final Zeiteinheit einheit) throws RoseException {
+		final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
+				.stream()
+				.filter(z -> z.getZeiteinheit().equals(einheit))
+				.max(BY_ANFANGSDATUM);
+		Date datum ;
+		if(optZeitraum.isPresent())
+			datum = optZeitraum.get().getAnfangsdatum();
+		else
+		{
+			datum = new Date();
+			addZeitraum(datum, einheit);
+		}
+		while(datum.before(endDatum))
+		{
+			datum = nextDatum(datum, einheit);
+			addZeitraum(datum, einheit);
 		}
 	}
 

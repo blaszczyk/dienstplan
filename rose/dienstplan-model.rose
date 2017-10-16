@@ -1,8 +1,6 @@
 begin entity Bewohner : P
 	varchar(50) name
 	char(6) farbe
-	date einzug
-	date auszug
 	manytomany Dienstplan
 	tostring %name
 end entity
@@ -23,14 +21,16 @@ end enum
 begin entity Zeitraum : P
 	date anfangsdatum
 	enum Zeiteinheit
-	tostring %zeiteinheit, start: %anfangsdatum
+	tostring %zeiteinheit, %anfangsdatum
 end entity
 
 begin entity Dienst : P
 	varchar(30) name
 	varchar(200) beschreibung
 	enum Zeiteinheit
-	int intervall
+	int intervall 1
+	int ordnung
+	varchar(50) strategie "all"
 	tostring %name
 end entity
 
@@ -39,5 +39,5 @@ begin entity DienstAusfuehrung : P
 	manytoone Bewohner
 	manytoone Zeitraum
 	varchar(200) kommentar
-	tostring %dienst von %bewohner in %zeitraum
+	tostring %dienst, %bewohner, %zeitraum
 end entity

@@ -15,8 +15,9 @@ import muettinghoven.dienstplan.app.model.DienstContainer;
 
 public class DienstTools {
 
+    private static final long MILLIS_PRO_TAG_L = 24L * 60L * 60L * 1000L;
 
-    private static final float MILLIS_PRO_TAG = 24f * 60f * 60f * 1000f;
+    private static final float MILLIS_PRO_TAG_F = 24f * 60f * 60f * 1000f;
 
     public static String zeitraum(final ZeitraumDto zeitraum)
     {
@@ -58,7 +59,7 @@ public class DienstTools {
 
     public static boolean isAktuell(final ZeitraumDto zeitraum) {
         final long diff = zeitraum.getAnfangsdatum() - System.currentTimeMillis();
-        final float diffTage = diff / MILLIS_PRO_TAG;
+        final float diffTage = diff / MILLIS_PRO_TAG_F;
         final float lowerBound = lowerBound(zeitraum.getZeiteinheit());
         final float upperBound = upperBound(zeitraum.getZeiteinheit());
         return lowerBound < diffTage && diffTage < upperBound;
@@ -78,11 +79,11 @@ public class DienstTools {
     private static float upperBound(final Zeiteinheit einheit) {
         switch (einheit) {
             case TAG:
-                return 1f;
+                return 0f;
             case WOCHE:
-                return 2f;
+                return 0f;
             case MONAT:
-                return 2f;
+                return 0f;
         }
         return 1;
     }
@@ -111,5 +112,9 @@ public class DienstTools {
                 return "Monate";
         }
         return "you should not see this";
+    }
+
+    public static int ordnung(final ZeitraumDto zeitraumDto) {
+        return (int) ( zeitraumDto.getAnfangsdatum() / MILLIS_PRO_TAG_L );
     }
 }
