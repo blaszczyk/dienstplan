@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
+import muettinghoven.dienstplan.app.dto.BewohnerDto;
 import muettinghoven.dienstplan.app.dto.Zeiteinheit;
 import muettinghoven.dienstplan.app.dto.ZeitraumDto;
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
@@ -27,10 +28,10 @@ public class DienstTools {
         switch (zeitraum.getZeiteinheit())
         {
             case TAG:
-                final DateFormat dateFormatTag = new SimpleDateFormat("EEE, dd.MM.yyyy", Locale.GERMAN);
+                final DateFormat dateFormatTag = new SimpleDateFormat("EEE dd.MM.yyyy", Locale.GERMAN);
                 return dateFormatTag.format(datum);
             case WOCHE:
-                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                calendar.add(Calendar.DAY_OF_YEAR, 6);
                 final Date endWoche = calendar.getTime();
                 final DateFormat dateFormatWocheEnd = new SimpleDateFormat("dd.MM.yyyy");
                 final DateFormat dateFormatWocheStart;
@@ -116,5 +117,9 @@ public class DienstTools {
 
     public static int ordnung(final ZeitraumDto zeitraumDto) {
         return (int) ( zeitraumDto.getAnfangsdatum() / MILLIS_PRO_TAG_L );
+    }
+
+    public static String bewohnerName(final BewohnerDto bewohner) {
+        return bewohner == null ? "noch keiner" : bewohner.getName();
     }
 }

@@ -34,7 +34,14 @@ public class DienstAusfuehrung implements Serializable {
 
     public DienstAusfuehrung(final DienstAusfuehrungDto ausfuehrung, final BewohnerDto bewohner, final DienstDto dienst, final ZeitraumDto zeitraum)
     {
-        this(ausfuehrung.getId(),bewohner.getName(),dienst.getName(),dienst.getBeschreibung(), DienstTools.zeitraum(zeitraum),ausfuehrung.getKommentar(), zeitraum.getAnfangsdatum(), dienst.getOrdnung(), DienstTools.isAktuell(zeitraum));
+        this(ausfuehrung.getId(),
+                DienstTools.bewohnerName(bewohner),
+                dienst.getName(),dienst.getBeschreibung(),
+                DienstTools.zeitraum(zeitraum),
+                ausfuehrung.getKommentar(),
+                zeitraum.getAnfangsdatum(),
+                dienst.getOrdnung(),
+                DienstTools.isAktuell(zeitraum));
     }
 
     private DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar, final long anfangszeit, final int dienstOrdnung, final boolean aktuell)

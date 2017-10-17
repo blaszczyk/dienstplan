@@ -66,7 +66,9 @@ public class DataProvider {
             for(final int ausfuehrungId : dienstDto.getDienstAusfuehrungsIds())
             {
                 final DienstAusfuehrungDto ausfuehrungDto = provider.getDienstausfuehrung(ausfuehrungId);
-                final BewohnerDto bewohnerDto = provider.getBewohner(ausfuehrungDto.getBewohnerId());
+                final BewohnerDto bewohnerDto = ausfuehrungDto.getBewohnerId() < 0
+                    ? null
+                    : provider.getBewohner(ausfuehrungDto.getBewohnerId());
                 final ZeitraumDto zeitraumDto = provider.getZetiraum(ausfuehrungDto.getZeitraumId());
                 final DienstAusfuehrung ausfuehrung = new DienstAusfuehrung(ausfuehrungDto,bewohnerDto,dienstDto,zeitraumDto);
 
@@ -99,6 +101,19 @@ public class DataProvider {
             final ZeitraumDto zeitraum = provider.getZetiraum(dto.getZeitraumId());
             final DienstAusfuehrung dienstAusfuehrung = new DienstAusfuehrung(dto,bewohnerDto,dienst,zeitraum);
             bewohner.add(dienstAusfuehrung);
+        }
+        for(final int planID : bewohnerDto.getDienstplansIds()) {
+            final DienstplanDto planDto = provider.getDienstplan(planID);
+            for(final int dienstId : planDto.getDienstsIds()) {
+                final DienstDto dienstDto = provider.getDienst(dienstId);
+                for(final int ausfuehrungId : dienstDto.getDienstAusfuehrungsIds()) {
+                    final DienstAusfuehrungDto ausfuehrungDto = provider.getDienstausfuehrung(ausfuehrungId);
+                    if(ausfuehrungDto.getBewohnerId() < 0) {
+                        final ZeitraumDto zeitraumDto = provider.getZetiraum(ausfuehrungDto.getZeitraumId());
+                        bewohner.add(new DienstAusfuehrung(ausfuehrungDto, null, dienstDto, zeitraumDto));
+                    }
+                }
+            }
         }
         bewohner.sort(BY_AKTUALITAET);
         bewohner.klumpeAktuelle();

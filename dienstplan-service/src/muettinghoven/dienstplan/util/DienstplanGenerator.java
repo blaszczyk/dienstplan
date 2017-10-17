@@ -1,6 +1,5 @@
 package muettinghoven.dienstplan.util;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -49,6 +48,9 @@ public class DienstplanGenerator
 	}
 
 	private void generiereDienstausfuehrungen(final Dienst dienst) throws RoseException {
+		final DienstStrategie strategie = DienstStrategie.parse(dienst.getStrategie());
+		if(strategie == null)
+			return;
 		final Optional<DienstAusfuehrung> optAusfuehrung = dienst.getDienstAusfuehrungs()
 				.stream()
 				.max(AUSFUEHRUNG_BY_ANFANGSDATUM);
@@ -56,7 +58,7 @@ public class DienstplanGenerator
 		if(optAusfuehrung.isPresent())
 			ausfuehrung = optAusfuehrung.get();
 		else
-			ausfuehrung = createDienstAusfuehrung(dienst, firstZeitraum(dienst.getZeiteinheit()));
+			ausfuehrung = createDienstAusfuehrung(dienst, firstZeitraum(dienst.getZeiteinheit()), strategie);
 		Zeitraum zeitraum = next(ausfuehrung.getZeitraum());
 		int skip = 0;
 		while(zeitraum != null)
@@ -64,7 +66,7 @@ public class DienstplanGenerator
 			skip++;
 			if(skip == dienst.getIntervall().intValue())
 			{
-				createDienstAusfuehrung(dienst, zeitraum);
+				createDienstAusfuehrung(dienst, zeitraum, strategie);
 				skip = 0;
 			}
 			zeitraum = next(zeitraum);
@@ -91,10 +93,10 @@ public class DienstplanGenerator
 		}
 	}
 
-	private DienstAusfuehrung createDienstAusfuehrung(final Dienst dienst, final Zeitraum zeitraum) throws RoseException
+	private DienstAusfuehrung createDienstAusfuehrung(final Dienst dienst, final Zeitraum zeitraum, final DienstStrategie strategie) throws RoseException
 	{
 		final DienstAusfuehrung ausfuehrung = controller.createNew(DienstAusfuehrung.class);
-		final Bewohner bewohner = nextBewohner(dienst);
+		final Bewohner bewohner = nextBewohner(dienst, strategie);
 		ausfuehrung.setEntity(DienstAusfuehrung.DIENST, dienst);
 		ausfuehrung.setEntity(DienstAusfuehrung.ZEITRAUM, zeitraum);
 		ausfuehrung.setEntity(DienstAusfuehrung.BEWOHNER, bewohner);
@@ -103,9 +105,9 @@ public class DienstplanGenerator
 		return ausfuehrung;
 	}
 
-	private Bewohner nextBewohner(final Dienst dienst)
+	private Bewohner nextBewohner(final Dienst dienst, final DienstStrategie strategie)
 	{
-		final List<Bewohner> bewohner = new ArrayList<>(plan.getBewohners());
+		final List<Bewohner> bewohner = strategie.selection(plan.getBewohners());
 		if(bewohner.isEmpty())
 			return null;
 		DienstAusfuehrung ausfuehrung = dienst.getDienstAusfuehrungs()
