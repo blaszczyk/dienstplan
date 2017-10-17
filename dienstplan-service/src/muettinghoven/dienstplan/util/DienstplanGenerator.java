@@ -47,7 +47,39 @@ public class DienstplanGenerator
 			generiereDienstausfuehrungen(dienst);
 	}
 
-	private void generiereDienstausfuehrungen(final Dienst dienst) throws RoseException {
+	private void generiereZeitraeume(final Date endDatum, final Zeiteinheit einheit) throws RoseException
+	{
+		final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
+				.stream()
+				.filter(z -> z.getZeiteinheit().equals(einheit))
+				.max(BY_ANFANGSDATUM);
+		Date datum ;
+		if(optZeitraum.isPresent())
+			datum = optZeitraum.get().getAnfangsdatum();
+		else
+		{
+			datum = new Date();
+			createZeitraum(datum, einheit);
+		}
+		while(datum.before(endDatum))
+		{
+			datum = nextDatum(datum, einheit);
+			createZeitraum(datum, einheit);
+		}
+	}
+
+	private void createZeitraum(final Date datum, final Zeiteinheit einheit) throws RoseException
+	{
+		final Zeitraum zeitraum = controller.createNew(Zeitraum.class);
+		zeitraum.setAnfangsdatum(datum);
+		zeitraum.setZeiteinheit(einheit);
+		zeitraum.setEntity(Zeitraum.DIENSTPLAN, plan);
+		LogManager.getLogger(DienstplanGenerator.class).info("neuer zeitraum " + zeitraum + " in " + plan);
+		controller.update(zeitraum, plan);
+	}
+
+	private void generiereDienstausfuehrungen(final Dienst dienst) throws RoseException
+	{
 		final DienstStrategie strategie = DienstStrategie.parse(dienst.getStrategie());
 		if(strategie == null)
 			return;
@@ -58,7 +90,7 @@ public class DienstplanGenerator
 		if(optAusfuehrung.isPresent())
 			ausfuehrung = optAusfuehrung.get();
 		else
-			ausfuehrung = createDienstAusfuehrung(dienst, firstZeitraum(dienst.getZeiteinheit()), strategie);
+			ausfuehrung = createDienstAusfuehrung(dienst, aktuellerZeitraum(dienst.getZeiteinheit()), strategie);
 		Zeitraum zeitraum = next(ausfuehrung.getZeitraum());
 		int skip = 0;
 		while(zeitraum != null)
@@ -70,26 +102,6 @@ public class DienstplanGenerator
 				skip = 0;
 			}
 			zeitraum = next(zeitraum);
-		}
-	}
-
-	private void generiereZeitraeume(final Date endDatum, final Zeiteinheit einheit) throws RoseException {
-		final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
-				.stream()
-				.filter(z -> z.getZeiteinheit().equals(einheit))
-				.max(BY_ANFANGSDATUM);
-		Date datum ;
-		if(optZeitraum.isPresent())
-			datum = optZeitraum.get().getAnfangsdatum();
-		else
-		{
-			datum = new Date();
-			addZeitraum(datum, einheit);
-		}
-		while(datum.before(endDatum))
-		{
-			datum = nextDatum(datum, einheit);
-			addZeitraum(datum, einheit);
 		}
 	}
 
@@ -123,23 +135,15 @@ public class DienstplanGenerator
 		return bewohner.get(index);
 	}
 
-	private Zeitraum firstZeitraum(final Zeiteinheit zeiteinheit)
+	private Zeitraum aktuellerZeitraum(final Zeiteinheit einheit)
 	{
+		final Date now = new Date();
 		return plan.getZeitraums()
 			.stream()
-			.filter(z -> z.getZeiteinheit().equals(zeiteinheit))
-			.min(BY_ANFANGSDATUM)
-			.orElse(null);
-	}
-
-	private void addZeitraum(final Date datum, final Zeiteinheit einheit) throws RoseException
-	{
-		final Zeitraum zeitraum = controller.createNew(Zeitraum.class);
-		zeitraum.setAnfangsdatum(datum);
-		zeitraum.setZeiteinheit(einheit);
-		zeitraum.setEntity(Zeitraum.DIENSTPLAN, plan);
-		LogManager.getLogger(DienstplanGenerator.class).info("neuer zeitraum " + zeitraum + " in " + plan);
-		controller.update(zeitraum, plan);
+			.filter(z -> z.getZeiteinheit().equals(einheit))
+			.filter(z -> z.getAnfangsdatum().before(now))
+			.max(BY_ANFANGSDATUM)
+			.orElseThrow(IllegalStateException::new);
 	}
 	
 	private static Date nextDatum(final Date datum, final Zeiteinheit einheit)
@@ -181,18 +185,5 @@ public class DienstplanGenerator
 			.max(AUSFUEHRUNG_BY_ANFANGSDATUM)
 			.orElse(null);
 	}
-
-//	public int jetztId(final Zeiteinheit einheit)
-//	{
-//		final Date now = new Date();
-//		final Optional<Zeitraum> optZeitraum = plan.getZeitraums()
-//				.stream()
-//				.filter(z -> z.getZeiteinheit().equals(einheit))
-//				.filter(z -> z.getAnfangsdatum().before(now))
-//				.max(BY_ANFANGSDATUM);
-//		if(!optZeitraum.isPresent())
-//			return -1;
-//		return optZeitraum.get().getId();
-//	}
 
 }
