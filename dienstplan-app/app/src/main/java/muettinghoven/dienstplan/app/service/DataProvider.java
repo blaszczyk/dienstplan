@@ -21,7 +21,7 @@ public class DataProvider {
         }
     };
 
-    private final Comparator<DienstAusfuehrung> BY_AKTUALITAET = new Comparator<DienstAusfuehrung>() {
+    private final Comparator<DienstAusfuehrung> BY_ANFANSZEIT_AND_DIENSTORDNUNG = new Comparator<DienstAusfuehrung>() {
         @Override
         public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
             final int compare = Long.compare(a1.getAnfangszeit(),a2.getAnfangszeit());
@@ -84,7 +84,7 @@ public class DataProvider {
             zeitraum.sort(BY_DIENST);
 
         plan.sortContainers();
-        plan.sortAktuell(BY_AKTUALITAET);
+        plan.sortAktuell(BY_ANFANSZEIT_AND_DIENSTORDNUNG);
         return plan;
     }
 
@@ -115,7 +115,7 @@ public class DataProvider {
                 }
             }
         }
-        bewohner.sort(BY_AKTUALITAET);
+        bewohner.sort(BY_ANFANSZEIT_AND_DIENSTORDNUNG);
         bewohner.klumpeAktuelle();
         return bewohner;
     }

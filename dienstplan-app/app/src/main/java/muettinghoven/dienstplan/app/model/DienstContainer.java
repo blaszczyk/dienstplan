@@ -67,9 +67,13 @@ public class DienstContainer implements Comparable<DienstContainer>{
         for(int i = ausfuehrungen.size() - 1; i >= 0; i--) {
             final DienstAusfuehrung ausfuehrung = ausfuehrungen.get(i);
             if (ausfuehrung.isAktuell()) {
-                if (i < lastAktuell - 1)
-                    moveTo(i,lastAktuell - 1);
-                lastAktuell = i;
+                if(lastAktuell < 0)
+                    lastAktuell = i;
+                else {
+                    lastAktuell--;
+                    if (i < lastAktuell)
+                        moveTo(i, lastAktuell);
+                }
             }
         }
     }

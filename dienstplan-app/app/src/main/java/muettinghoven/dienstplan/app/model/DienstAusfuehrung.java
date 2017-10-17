@@ -99,8 +99,17 @@ public class DienstAusfuehrung implements Serializable {
     }
 
     @Override
-    public String toString()
-    {
-        return "id:" + id + ", bewohner:" + bewohner + ", dienst:" + dienst + ", dienstBeschreibung:" + dienstBeschreibung + ", zeitraum:" + zeitraum + ", kommentar:" + kommentar;
+    public String toString() {
+        return "DienstAusfuehrung{" +
+                "id=" + id +
+                ", bewohner='" + bewohner + '\'' +
+                ", dienst='" + dienst + '\'' +
+                ", dienstBeschreibung='" + dienstBeschreibung + '\'' +
+                ", zeitraum='" + zeitraum + '\'' +
+                ", kommentar='" + kommentar + '\'' +
+                ", anfangszeit=" + anfangszeit +
+                ", dienstOrdnung=" + dienstOrdnung +
+                ", aktuell=" + aktuell +
+                '}';
     }
 }
