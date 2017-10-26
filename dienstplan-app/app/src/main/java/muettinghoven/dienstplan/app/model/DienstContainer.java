@@ -5,9 +5,10 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
-public class DienstContainer implements Comparable<DienstContainer>{
+public class DienstContainer implements Comparable<DienstContainer>, Iterable<DienstAusfuehrung> {
 
     public static enum Typ {
         DIENST,
@@ -95,6 +96,11 @@ public class DienstContainer implements Comparable<DienstContainer>{
     @Override
     public int compareTo(@NonNull final DienstContainer that) {
         return Integer.compare(this.ordnung,that.ordnung);
+    }
+
+    @Override
+    public Iterator<DienstAusfuehrung> iterator() {
+        return ausfuehrungen.iterator();
     }
 
 }

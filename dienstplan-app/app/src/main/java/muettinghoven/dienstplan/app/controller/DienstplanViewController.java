@@ -25,9 +25,11 @@ import muettinghoven.dienstplan.app.service.DataCache;
 import muettinghoven.dienstplan.app.service.DataProvider;
 import muettinghoven.dienstplan.app.service.ServiceException;
 import muettinghoven.dienstplan.app.tools.DienstTools;
-import muettinghoven.dienstplan.app.view.ContainerAdapter;
+import muettinghoven.dienstplan.app.tools.Preferences;
+import muettinghoven.dienstplan.app.view.adapter.ContainerAdapter;
+import muettinghoven.dienstplan.app.view.adapter.MeineDiensteAdapter;
 import muettinghoven.dienstplan.app.view.wrapper.ContainerWrapper;
-import muettinghoven.dienstplan.app.view.DienstAdapter;
+import muettinghoven.dienstplan.app.view.adapter.DienstAdapter;
 import muettinghoven.dienstplan.app.view.DienstDetailActivity;
 import muettinghoven.dienstplan.app.view.MainActivity;
 import muettinghoven.dienstplan.app.view.R;
@@ -47,15 +49,21 @@ public class DienstplanViewController {
 
     private Dienstplan plan;
 
-    //TODO: load from preferences
-    private int bewohnerId = 1;
-    private String baseURL = "http://192.168.1.223:4053";
+    private int bewohnerId;
+    private String baseURL;
 
     public DienstplanViewController(final MainActivity mainActivity) {
         this.mainActivity = mainActivity;
+        final Preferences prefs = new Preferences(mainActivity);
+        prefs.loadProperties();
+        bewohnerId = prefs.getBewohnerId();
+        baseURL = prefs.getBaseURL();
         dataCache = new DataCache(baseURL, mainActivity.getFilesDir());
         dataProvider = new DataProvider(dataCache);
+
+        new NotificationController(mainActivity).startThread();
     }
+
 
     public void initializeAsync(){
         final Thread thread = new Thread(){
@@ -314,7 +322,7 @@ public class DienstplanViewController {
                     bewohnerNameTextView.setText(bewohner.getName());
 
                     final ListView planListView = (ListView) meineDiensteView.findViewById(R.id.dienstAusfuehrungListView);
-                    final DienstAdapter adapter = new DienstAdapter(mainActivity);
+                    final MeineDiensteAdapter adapter = new MeineDiensteAdapter(mainActivity);
                     planListView.setAdapter(adapter);
                     planListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override

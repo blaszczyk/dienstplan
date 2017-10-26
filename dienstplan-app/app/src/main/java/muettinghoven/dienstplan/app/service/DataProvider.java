@@ -110,7 +110,8 @@ public class DataProvider {
                     final DienstAusfuehrungDto ausfuehrungDto = provider.getDienstausfuehrung(ausfuehrungId);
                     if(ausfuehrungDto.getBewohnerId() < 0) {
                         final ZeitraumDto zeitraumDto = provider.getZetiraum(ausfuehrungDto.getZeitraumId());
-                        bewohner.add(new DienstAusfuehrung(ausfuehrungDto, null, dienstDto, zeitraumDto));
+                        if(DienstTools.isAktuell(zeitraumDto))
+                            bewohner.add(new DienstAusfuehrung(ausfuehrungDto, null, dienstDto, zeitraumDto));
                     }
                 }
             }

@@ -2,11 +2,15 @@ package muettinghoven.dienstplan.app.tools;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import muettinghoven.dienstplan.app.dto.BewohnerDto;
 import muettinghoven.dienstplan.app.dto.Zeiteinheit;
@@ -19,6 +23,13 @@ public class DienstTools {
     private static final long MILLIS_PRO_TAG_L = 24L * 60L * 60L * 1000L;
 
     private static final float MILLIS_PRO_TAG_F = 24f * 60f * 60f * 1000f;
+
+    private static final Comparator<DienstAusfuehrung> BY_NEXT_ERINNERUNG = new Comparator<DienstAusfuehrung>() {
+        @Override
+        public int compare(final DienstAusfuehrung a1, final DienstAusfuehrung a2) {
+            return Integer.compare(nextErinnerung(a1),nextErinnerung(a2));
+        }
+    };
 
     public static String zeitraum(final ZeitraumDto zeitraum)
     {
@@ -113,6 +124,53 @@ public class DienstTools {
                 return "Monate";
         }
         return "you should not see this";
+    }
+
+    public static int nextErinnerung(final Iterable<DienstAusfuehrung> container) {
+        int nextErinnerung = Integer.MAX_VALUE;
+        for(final DienstAusfuehrung ausfuehrung : container)
+            if(ausfuehrung.isAktuell())
+                nextErinnerung = Math.min(nextErinnerung, nextErinnerung(ausfuehrung));
+        return nextErinnerung;
+    }
+
+    public static int nextErinnerung(final DienstAusfuehrung ausfuehrung) {
+        final String erinnerung = isParsableErinnerung(ausfuehrung.getErinnerung()) ?
+                ausfuehrung.getErinnerung() :
+                getDefaultErinnerung(ausfuehrung.getZeiteinheit());
+        final String[] split = erinnerung.split("\\,");
+        final int start = Integer.parseInt(split[0]);
+        final int intervall = Integer.parseInt(split[1]);
+        final int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if(hour < start)
+            return start - hour;
+        else
+            return intervall;
+    }
+
+    public static List<DienstAusfuehrung> sortedByErinnerung(final Iterable<DienstAusfuehrung> ausfuehrungs) {
+        final List<DienstAusfuehrung> result = new ArrayList<>();
+        for(final DienstAusfuehrung ausfuehrung : ausfuehrungs)
+            if (ausfuehrung.isAktuell())
+                result.add(ausfuehrung);
+        Collections.sort(result, BY_NEXT_ERINNERUNG);
+        return result;
+    }
+
+    private static boolean isParsableErinnerung(final String erinnerung) {
+        return erinnerung != null && Pattern.matches("^\\d+\\,\\d+$",erinnerung);
+    }
+
+    private static String getDefaultErinnerung(final Zeiteinheit zeiteinheit) {
+        switch (zeiteinheit) {
+            case TAG:
+                return "8,2";
+            case WOCHE:
+                return "9,24";
+            case MONAT:
+                return "10,72";
+        }
+        return "7,1";
     }
 
     public static int ordnung(final ZeitraumDto zeitraumDto) {

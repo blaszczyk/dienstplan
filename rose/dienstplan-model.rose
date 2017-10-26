@@ -30,6 +30,7 @@ begin entity Dienst : P
 	enum Zeiteinheit
 	int intervall 1
 	int ordnung
+	varchar(15) erinnerung ""
 	varchar(50) strategie "all"
 	tostring %name
 end entity

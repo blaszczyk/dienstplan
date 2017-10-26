@@ -1,4 +1,4 @@
-package muettinghoven.dienstplan.app.view;
+package muettinghoven.dienstplan.app.view.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
+import muettinghoven.dienstplan.app.view.R;
 
 
 public class DienstAdapter extends BaseAdapter {

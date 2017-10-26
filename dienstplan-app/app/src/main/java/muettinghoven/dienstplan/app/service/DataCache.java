@@ -44,6 +44,12 @@ public class DataCache
     private static final Type ZEITRAUM_LIST = new TypeToken<ArrayList<ZeitraumDto>>(){}.getType();
     private static final Type AUSFUEHRUNG_LIST = new TypeToken<ArrayList<DienstAusfuehrungDto>>(){}.getType();
 
+    private static final String DIENSTE = "dienste";
+    private static final String BEWOHNER = "bewohner";
+    private static final String PLAENE = "plaene";
+    private static final String ZEITREAUME = "zeitraeume";
+    private static final String DIENSTAUSFUEHRUNGEN = "dienstausfuehrungen";
+
     private final DienstplanService service;
 
     private final File baseDir;
@@ -112,11 +118,11 @@ public class DataCache
     }
 
     public void saveToFiles() throws ServiceException {
-        saveToFile("dienste",dienste);
-        saveToFile("bewohner", bewohner);
-        saveToFile("plaene", dienstplaene);
-        saveToFile("zeitreaume", zeitraeume);
-        saveToFile("dienstausfuehrungen", dienstausfuehrungen);
+        saveToFile(DIENSTE,dienste);
+        saveToFile(BEWOHNER, bewohner);
+        saveToFile(PLAENE, dienstplaene);
+        saveToFile(ZEITREAUME, zeitraeume);
+        saveToFile(DIENSTAUSFUEHRUNGEN, dienstausfuehrungen);
     }
 
     private <T extends Identifyable> void saveToFile(final String fileName, final Map<Integer,T> map) throws ServiceException {
@@ -130,25 +136,26 @@ public class DataCache
     }
 
     public void loadFromFiles() throws ServiceException {
-        loadFromFile("dienste",dienste,DIENST_LIST);
-        loadFromFile("bewohner", bewohner,BEWOHNER_LIST);
-        loadFromFile("plaene", dienstplaene,PLAN_LIST);
-        loadFromFile("zeitreaume", zeitraeume,ZEITRAUM_LIST);
-        loadFromFile("dienstausfuehrungen", dienstausfuehrungen,AUSFUEHRUNG_LIST);
+        loadFromFile(DIENSTE,dienste,DIENST_LIST);
+        loadFromFile(BEWOHNER, bewohner,BEWOHNER_LIST);
+        loadFromFile(PLAENE, dienstplaene,PLAN_LIST);
+        loadFromFile(ZEITREAUME, zeitraeume,ZEITRAUM_LIST);
+        loadFromFile(DIENSTAUSFUEHRUNGEN, dienstausfuehrungen,AUSFUEHRUNG_LIST);
     }
 
     private <T extends Identifyable> void loadFromFile(final String fileName, final Map<Integer,T> map, final Type type) throws ServiceException {
         final File file = new File(baseDir, fileName + ".json");
-        try(final Reader reader = new FileReader(file)) {
-            final List<T> dtos = GSON.fromJson(reader, type);
-            store(dtos, map);
-        }
-        catch (IOException e) {
-            throw new ServiceException(e);
+        if(file.exists()) {
+            try (final Reader reader = new FileReader(file)) {
+                final List<T> dtos = GSON.fromJson(reader, type);
+                store(dtos, map);
+            } catch (IOException e) {
+               throw new ServiceException(e);
+            }
         }
     }
 
-    public List<BewohnerDto> getBewohner(final List<Integer> ids) throws ServiceException
+    private List<BewohnerDto> getBewohner(final List<Integer> ids) throws ServiceException
     {
         try {
             if (!hasAllIds(ids, bewohner)) {
@@ -164,7 +171,7 @@ public class DataCache
         }
     }
 
-    public BewohnerDto getBewohner(final int id) throws ServiceException
+    BewohnerDto getBewohner(final int id) throws ServiceException
     {
         try {
             if (!hasId(id, bewohner)) {
@@ -179,7 +186,7 @@ public class DataCache
         }
     }
 
-    public List<DienstDto> getDienst(final List<Integer> ids) throws ServiceException
+    private List<DienstDto> getDienst(final List<Integer> ids) throws ServiceException
     {
         try {
             if (!hasAllIds(ids, dienste)) {
@@ -195,7 +202,7 @@ public class DataCache
         }
     }
 
-    public DienstDto getDienst(final int id) throws ServiceException
+    DienstDto getDienst(final int id) throws ServiceException
     {
         try {
             if (!hasId(id, dienste)) {
@@ -210,7 +217,7 @@ public class DataCache
         }
     }
 
-    public List<DienstplanDto> getDienstplan(final List<Integer> ids) throws ServiceException
+    List<DienstplanDto> getDienstplan(final List<Integer> ids) throws ServiceException
     {
         try {
             if (!hasAllIds(ids, dienstplaene)) {
@@ -226,7 +233,7 @@ public class DataCache
         }
     }
 
-    public DienstplanDto getDienstplan(final int id) throws ServiceException
+    DienstplanDto getDienstplan(final int id) throws ServiceException
     {
         try {
             if (!hasId(id, dienstplaene)) {
@@ -241,7 +248,7 @@ public class DataCache
         }
     }
 
-    public List<ZeitraumDto> getZetiraum(final List<Integer> ids) throws ServiceException
+    private List<ZeitraumDto> getZetiraum(final List<Integer> ids) throws ServiceException
     {
         try {
             if (!hasAllIds(ids, zeitraeume)) {
@@ -257,7 +264,7 @@ public class DataCache
         }
     }
 
-    public ZeitraumDto getZetiraum(final int id) throws ServiceException
+    ZeitraumDto getZetiraum(final int id) throws ServiceException
     {
         try {
             if (!hasId(id, zeitraeume)) {
@@ -272,7 +279,7 @@ public class DataCache
         }
     }
 
-    public List<DienstAusfuehrungDto> getDienstausfuehrung(final List<Integer> ids) throws ServiceException
+    List<DienstAusfuehrungDto> getDienstausfuehrung(final List<Integer> ids) throws ServiceException
     {
         try {
             if (!hasAllIds(ids, dienstausfuehrungen)) {
@@ -288,7 +295,7 @@ public class DataCache
         }
     }
 
-    public DienstAusfuehrungDto getDienstausfuehrung(final int id) throws ServiceException
+    DienstAusfuehrungDto getDienstausfuehrung(final int id) throws ServiceException
     {
         try {
             if (!hasId(id, dienstausfuehrungen)) {

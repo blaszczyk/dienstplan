@@ -1,14 +1,11 @@
 package muettinghoven.dienstplan.app.model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 import muettinghoven.dienstplan.app.dto.BewohnerDto;
 import muettinghoven.dienstplan.app.dto.DienstAusfuehrungDto;
 import muettinghoven.dienstplan.app.dto.DienstDto;
+import muettinghoven.dienstplan.app.dto.Zeiteinheit;
 import muettinghoven.dienstplan.app.dto.ZeitraumDto;
 import muettinghoven.dienstplan.app.tools.DienstTools;
 
@@ -24,9 +21,13 @@ public class DienstAusfuehrung implements Serializable {
 
     private final String zeitraum;
 
+    private final Zeiteinheit zeiteinheit;
+
     private final String kommentar;
 
     private final long anfangszeit;
+
+    private final String erinnerung;
 
     private final int dienstOrdnung;
 
@@ -38,21 +39,36 @@ public class DienstAusfuehrung implements Serializable {
                 DienstTools.bewohnerName(bewohner),
                 dienst.getName(),dienst.getBeschreibung(),
                 DienstTools.zeitraum(zeitraum),
+                dienst.getZeiteinheit(),
                 ausfuehrung.getKommentar(),
                 zeitraum.getAnfangsdatum(),
+                dienst.getErinnerung(),
                 dienst.getOrdnung(),
                 DienstTools.isAktuell(zeitraum));
     }
 
-    private DienstAusfuehrung(final int id, final String bewohner, final String dienst, final String dienstBeschreibung, final String zeitraum, final String kommentar, final long anfangszeit, final int dienstOrdnung, final boolean aktuell)
+    private DienstAusfuehrung(
+            final int id,
+            final String bewohner,
+            final String dienst,
+            final String dienstBeschreibung,
+            final String zeitraum,
+            final Zeiteinheit zeiteinheit,
+            final String kommentar,
+            final long anfangszeit,
+            final String erinnerung,
+            final int dienstOrdnung,
+            final boolean aktuell)
     {
         this.id = id;
         this.bewohner = bewohner;
         this.dienst = dienst;
         this.dienstBeschreibung = dienstBeschreibung;
         this.zeitraum = zeitraum;
+        this.zeiteinheit = zeiteinheit;
         this.kommentar = kommentar;
         this.anfangszeit = anfangszeit;
+        this.erinnerung = erinnerung;
         this.dienstOrdnung = dienstOrdnung;
         this.aktuell = aktuell;
     }
@@ -81,6 +97,10 @@ public class DienstAusfuehrung implements Serializable {
         return zeitraum;
     }
 
+    public Zeiteinheit getZeiteinheit() {
+        return zeiteinheit;
+    }
+
     public String getKommentar()
     {
         return kommentar;
@@ -88,6 +108,10 @@ public class DienstAusfuehrung implements Serializable {
 
     public long getAnfangszeit() {
         return anfangszeit;
+    }
+
+    public String getErinnerung() {
+        return erinnerung;
     }
 
     public int getDienstOrdnung() {

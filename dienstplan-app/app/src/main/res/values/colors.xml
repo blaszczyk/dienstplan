@@ -7,4 +7,9 @@
     <color name="colorCloud">#FFFFFF</color>
     <color name="colorCross">#FF0000</color>
     <color name="colorRefresh">#00EE00</color>
+
+    <color name="colorIconMain">#FFFFFF</color>
+    <color name="colorIconMainBckg">#DD8800</color>
+    <color name="colorReminder">#333333</color>
+    <color name="colorReminderOff">#DDDDDD</color>
 </resources>
