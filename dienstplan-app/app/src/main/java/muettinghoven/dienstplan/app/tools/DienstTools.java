@@ -145,7 +145,7 @@ public class DienstTools {
         if(hour < start)
             return start - hour;
         else
-            return intervall;
+            return intervall - 1;
     }
 
     public static List<DienstAusfuehrung> sortedByErinnerung(final Iterable<DienstAusfuehrung> ausfuehrungs) {

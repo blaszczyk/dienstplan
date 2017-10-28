@@ -17,6 +17,7 @@ import muettinghoven.dienstplan.app.controller.DienstplanViewController;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnTouchListener
 {
+    public static final String SHOW_MEINE_DIENSTE = "muettinghoven.dienstplan.app.view.MainActivity.showMeineDienste";
 
     private boolean visible = true;
 
@@ -27,8 +28,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private float initialX;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState)
-    {
+    protected void onCreate(final Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -45,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        controller.initializeAsync();
+        final boolean showMeineDienste = getIntent().getBooleanExtra(SHOW_MEINE_DIENSTE,false);
+        controller.initializeAsync(showMeineDienste);
     }
 
     public void setConnectionStatusIcon(final int iconRes) {
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (id)
         {
             case R.id.action_refresh:
-                controller.refresh();
+                controller.refresh(false);
             case R.id.action_settings:
                 //TODO: open settings activity
                 return true;

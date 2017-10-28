@@ -1,6 +1,7 @@
 package muettinghoven.dienstplan.app.view.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
 import muettinghoven.dienstplan.app.tools.Preferences;
+import muettinghoven.dienstplan.app.view.DienstDetailActivity;
 import muettinghoven.dienstplan.app.view.R;
 
 
@@ -76,6 +78,7 @@ public class MeineDiensteAdapter extends BaseAdapter {
 
         final Preferences prefs = new Preferences(context);
         prefs.loadProperties();
+
         final Button erinnerungButton = (Button) frameLayout.findViewById(R.id.erinnerungButton);
         if(dienst.isAktuell()) {
             setHideErinnerung(erinnerungButton, prefs.isHideErinnerung(dienst.getId()));
@@ -85,7 +88,20 @@ public class MeineDiensteAdapter extends BaseAdapter {
             erinnerungButton.setBackgroundResource(R.drawable.reminder_off);
         }
 
+        frameLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDienstAusfuehrungActivity(dienst);
+            }
+        });
+
         return frameLayout;
+    }
+
+    private void startDienstAusfuehrungActivity(final DienstAusfuehrung ausfuehrung) {
+        final Intent dienstDetailView = new Intent(context,DienstDetailActivity.class);
+        dienstDetailView.putExtra(DienstDetailActivity.DIENST_AUSFUEHRUNG,ausfuehrung);
+        context.startActivity(dienstDetailView);
     }
 
     private class ErinnerungToggle implements View.OnClickListener {

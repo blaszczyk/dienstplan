@@ -60,16 +60,14 @@ public class DienstplanViewController {
         baseURL = prefs.getBaseURL();
         dataCache = new DataCache(baseURL, mainActivity.getFilesDir());
         dataProvider = new DataProvider(dataCache);
-
-        new NotificationController(mainActivity).startThread();
     }
 
 
-    public void initializeAsync(){
+    public void initializeAsync(final boolean showMeineDienste){
         final Thread thread = new Thread(){
             @Override
             public void run() {
-                initialize();
+                initialize(showMeineDienste);
             }
         };
         thread.start();
@@ -79,7 +77,7 @@ public class DienstplanViewController {
         catch (InterruptedException e) {}
     }
 
-    private void initialize(){
+    private void initialize(final boolean showMeineDienste){
         try{
             dataCache.loadFromFiles();
             final NavigationView navigationView = (NavigationView) mainActivity.findViewById(R.id.nav_view);
@@ -89,7 +87,7 @@ public class DienstplanViewController {
             {
                 navigationView.getMenu().add(0, Menu.FIRST + e.getKey(), Menu.NONE,e.getValue()).setIcon(R.drawable.ic_menu_send);
             }
-            refresh();
+            refresh(showMeineDienste);
         }
         catch (ServiceException e) {
             e.printStackTrace();
@@ -109,7 +107,7 @@ public class DienstplanViewController {
         }.start();
     }
 
-    public void refresh() {
+    public void refresh(final boolean showMeineDienste) {
         mainActivity.setConnectionStatusIcon(R.drawable.cloud_refresh);
         final Thread refreshThread = new Thread("refresh-thread") {
             @Override
@@ -122,21 +120,25 @@ public class DienstplanViewController {
                         dataCache.clear();
                         dataCache.loadDataForBewohner(bewohnerId);
                         dataCache.saveToFiles();
-                        final MainContentWrapper wrapper = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
-                        if (wrapper.isBewohner())
-                            showMeineDiensteView();
-                        else {
-                            final int planId = wrapper.getPlanId();
-                            showDienstPlanView(planId);
-                        }
-                        mainActivity.setConnectionStatusIcon(R.drawable.cloud);
                     }
+                    refreshUi(showMeineDienste);
                 } catch (ServiceException e) {
                     e.printStackTrace();
                 }
             }
         };
         refreshThread.start();
+    }
+
+    private void refreshUi(final boolean showMeineDienste) {
+        final MainContentWrapper wrapper = (MainContentWrapper) mainActivity.findViewById(R.id.main_content_wrapper);
+        if (showMeineDienste || wrapper.isBewohner())
+            showMeineDiensteView();
+        else {
+            final int planId = wrapper.getPlanId();
+            showDienstPlanView(planId);
+        }
+        mainActivity.setConnectionStatusIcon(R.drawable.cloud);
     }
 
     public void checkConnection() {

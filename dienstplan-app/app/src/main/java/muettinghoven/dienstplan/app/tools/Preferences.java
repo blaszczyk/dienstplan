@@ -21,10 +21,13 @@ public class Preferences {
     private int bewohnerId;
     private String baseURL;
     private Set<Integer> hideErinnerungen;
+    private int nextErinnerungHours;
 
     private static final String KEY_SERVICE_URL = "muettinghoven.dienstplan.url";
     private static final String KEY_BEWOHNER_ID = "muettinghoven.dienstplan.bewodner.id";
     private static final String KEY_HIDE_ERINNERUNGEN = "muettinghoven.dienstplan.erinnerungen.hide";
+    private static final java.lang.String KEY_NEXT_ERINNERUNG = "muettinghoven.dienstplan.next.erinnerung";
+
     private static final String PROPERTIES_FILE_NAME = "main-properties.xml";
 
     public void saveProperties() {
@@ -38,6 +41,8 @@ public class Preferences {
             sb.append(i).append(" ");
         properties.put(KEY_HIDE_ERINNERUNGEN,sb.toString().trim());
 
+        properties.put(KEY_NEXT_ERINNERUNG, Integer.toString(nextErinnerungHours));
+
         try {
             properties.storeToXML(new FileOutputStream(propertiesFile),"generated");
         } catch (IOException e) {
@@ -47,6 +52,7 @@ public class Preferences {
 
     public void loadProperties() {
         final Properties properties = new Properties();
+        insertDefaults(properties);
         try {
             properties.loadFromXML(new FileInputStream(propertiesFile));
         } catch (IOException e) {
@@ -63,6 +69,7 @@ public class Preferences {
             for (final String id : split)
                 hideErinnerungen.add(Integer.parseInt(id));
         }
+        nextErinnerungHours = Integer.parseInt(properties.getProperty(KEY_NEXT_ERINNERUNG));
     }
 
     public int getBewohnerId() {
@@ -97,5 +104,20 @@ public class Preferences {
             hideErinnerungen.remove(ausfuhrungId);
         else
             hideErinnerungen.add(ausfuhrungId);
+    }
+
+    public int getNextErinnerungHours() {
+        return nextErinnerungHours;
+    }
+
+    public void setNextErinnerungHours(int nextErinnerungHours) {
+        this.nextErinnerungHours = nextErinnerungHours;
+    }
+
+    private void insertDefaults(final Properties properties) {
+        properties.put(KEY_SERVICE_URL,"http://192.168.1.223:4053");
+        properties.put(KEY_BEWOHNER_ID,"1");
+        properties.put(KEY_HIDE_ERINNERUNGEN,"");
+        properties.put(KEY_NEXT_ERINNERUNG,"8");
     }
 }

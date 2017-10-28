@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 
+import java.util.Calendar;
 import java.util.List;
 
 import muettinghoven.dienstplan.app.model.DienstAusfuehrung;
@@ -24,7 +25,7 @@ public class NotificationController {
     private static final long MILLIS_PER_HOUR = 60L * 60L * 1000L;
     private static final int NOTIFICATION_ID = 196883;
 
-    private Thread notificationThread;
+    private Thread notificationThread = null;
 
     private final Context context;
 
@@ -48,23 +49,34 @@ public class NotificationController {
     }
 
     private void run() {
-        long sleepTime = MILLIS_PER_HOUR;
         while(true) {
             try {
                 final DienstContainer bewohner = getBewohner();
                 final List<DienstAusfuehrung> ausfuehrungs = DienstTools.sortedByErinnerung(bewohner);
                 filterChecked(ausfuehrungs);
-                sleepTime = DienstTools.nextErinnerung(ausfuehrungs) * MILLIS_PER_HOUR;
-                sendNotification(ausfuehrungs);
+                if(notificationRequired(ausfuehrungs))
+                    sendNotification(ausfuehrungs);
             } catch (ServiceException e) {
-                sleepTime = MILLIS_PER_HOUR;
             }
             try {
-                Thread.sleep(sleepTime);
+                Thread.sleep(MILLIS_PER_HOUR);
             } catch (Exception e) {
                 return;
             }
         }
+    }
+
+    private boolean notificationRequired(final List<DienstAusfuehrung> ausfuehrungs) {
+
+        final Preferences prefs = new Preferences(context);
+        prefs.loadProperties();
+        final int nowHours = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        final int nextErinnerungByClock = prefs.getNextErinnerungHours();
+        final int nextErinnerungByPlan = nowHours + DienstTools.nextErinnerung(ausfuehrungs);
+        final int nextErinnerung = Math.min(nextErinnerungByClock,nextErinnerungByPlan);
+        prefs.setNextErinnerungHours(nextErinnerung);
+        prefs.saveProperties();
+        return nextErinnerung <= nowHours;
     }
 
     private String getUndDann(final List<DienstAusfuehrung> ausfuehrungs) {
@@ -92,6 +104,7 @@ public class NotificationController {
         builder.setVibrate(new long[]{0,250,150,250,150,250,150,800});
 
         final Intent mainActivityIntent = new Intent(context, MainActivity.class);
+        mainActivityIntent.putExtra(MainActivity.SHOW_MEINE_DIENSTE,true);
         final PendingIntent pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, mainActivityIntent,0);
         builder.setContentIntent(pendingIntent);
 
